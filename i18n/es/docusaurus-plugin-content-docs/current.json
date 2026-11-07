@@ -1,0 +1,30 @@
+{
+  "version.label": {
+    "message": "Siguiente",
+    "description": "The label for version current"
+  },
+  "sidebar.docs.category.Get started": {
+    "message": "Primeros pasos",
+    "description": "The label for category 'Get started' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Concepts": {
+    "message": "Conceptos",
+    "description": "The label for category 'Concepts' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Guides": {
+    "message": "Guías",
+    "description": "The label for category 'Guides' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Clients": {
+    "message": "Clientes",
+    "description": "The label for category 'Clients' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Operations": {
+    "message": "Operación",
+    "description": "The label for category 'Operations' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Reference": {
+    "message": "Referencia",
+    "description": "The label for category 'Reference' in sidebar 'docs'"
+  }
+}

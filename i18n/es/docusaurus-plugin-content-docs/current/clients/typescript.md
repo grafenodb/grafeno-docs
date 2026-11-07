@@ -1,0 +1,79 @@
+---
+title: Cliente TypeScript
+description: Usa Grafeno desde aplicaciones JavaScript y TypeScript.
+---
+
+# Cliente TypeScript
+
+`grafeno-client` envuelve la API HTTP, usa el `fetch` global de la plataforma y no tiene dependencias en tiempo de ejecución.
+
+```ts
+import {Grafeno} from 'grafeno-client';
+
+const grafeno = new Grafeno({
+  url: 'http://127.0.0.1:7810',
+  token: process.env.GRAFENO_TOKEN,
+});
+const vault = grafeno.namespace('vault-123');
+```
+
+## Consulta y recupera
+
+```ts
+const people = await vault.query(
+  'MATCH (p:Person) WHERE p.age > $age RETURN p.name',
+  {age: 30},
+);
+
+const context = await vault.context({text: question, budget: 1500});
+prompt += context.rendered;
+```
+
+## Sincroniza cambios relacionados de forma atómica
+
+```ts
+await vault.batch([
+  {op: 'upsert_node', ref: '$note', node: {
+    id: noteId,
+    labels: ['Note'],
+    props: {title},
+    text,
+  }},
+  {op: 'delete_edges_from', from: '$note', label: 'links_to'},
+  ...linkedIds.map((to) => ({
+    op: 'create_edge' as const,
+    edge: {from: '$note', label: 'links_to', to},
+  })),
+]);
+```
+
+## Sesiones y clústeres
+
+Los usuarios pueden iniciar sesión con contraseña. `onSession` recibe los tokens renovados para que la aplicación los conserve.
+
+```ts
+const client = new Grafeno({url, onSession: saveTokens});
+await client.signIn('ana', password);
+```
+
+Para un clúster, entrega las URL de varios miembros. El cliente cambia de miembro ante fallos, transmite la última posición observada para conservar la lectura tras escritura y admite consistencia `local`, `bounded` o `linearizable`.
+
+```ts
+const cluster = new Grafeno({
+  url: ['http://10.0.0.1:7810', 'http://10.0.0.2:7810'],
+  token,
+});
+```
+
+## Revisa el motor primero
+
+El cliente habla la versión 1 de la API HTTP y tiene su propia versión (`CLIENT_VERSION`). `connect()` le pregunta al motor qué es (`GET /v1/about`) y rechaza uno con el que no puede trabajar; `supports()` dice luego qué puede hacer el motor, así tu aplicación apaga lo que le falta a un motor más viejo en vez de fallar:
+
+```ts
+const about = await grafeno.connect();   // lanza GrafenoError con código "incompatible" si no comparten ninguna versión de la API
+console.log(about.version, about.api.version);
+if (grafeno.supports('audit')) showAuditLog();
+if (grafeno.supports('cluster.groups')) showPlacement();
+```
+
+Los nombres de campos de la API permanecen en `snake_case`. Los fallos HTTP se lanzan como `GrafenoError` con `status` y el `code` del error de la API.

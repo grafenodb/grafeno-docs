@@ -1,0 +1,38 @@
+{
+  "link.title.Documentation": {
+    "message": "Documentación",
+    "description": "The title of the footer links column with title=Documentation in the footer"
+  },
+  "link.title.Project": {
+    "message": "Proyecto",
+    "description": "The title of the footer links column with title=Project in the footer"
+  },
+  "link.item.label.Introduction": {
+    "message": "Introducción",
+    "description": "The label of footer link with label=Introduction linking to /"
+  },
+  "link.item.label.Engine on GitHub": {
+    "message": "Motor en GitHub",
+    "description": "The label of footer link with label=Engine on GitHub linking to https://github.com/grafenodb/grafeno"
+  },
+  "copyright": {
+    "message": "Grafeno.",
+    "description": "The footer copyright"
+  },
+  "link.item.label.Install Grafeno": {
+    "message": "Instalar Grafeno",
+    "description": "The label of footer link with label=Install Grafeno linking to /get-started/install"
+  },
+  "link.item.label.Your first graph": {
+    "message": "Tu primer grafo",
+    "description": "The label of footer link with label=Your first graph linking to /get-started/first-graph"
+  },
+  "link.item.label.Run scripts": {
+    "message": "Ejecutar scripts",
+    "description": "The label of footer link with label=Run scripts linking to /guides/scripts"
+  },
+  "link.item.label.Grafeno Studio on GitHub": {
+    "message": "Grafeno Studio en GitHub",
+    "description": "The label of footer link with label=Grafeno Studio on GitHub linking to https://github.com/grafenodb/grafeno-studio"
+  }
+}
