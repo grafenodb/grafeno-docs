@@ -30,9 +30,28 @@ npm install
 npm start
 ```
 
-The site is at `http://localhost:3000` (`npm start -- --locale es` for the
-Spanish one). `npm run build` writes `build/` with both languages, and
-fails on any broken link or anchor.
+The site is at `http://localhost:3000/docs/` (`npm start -- --locale es`
+for the Spanish one). `npm run build` writes it into `build/docs/`, with
+both languages, and fails on any broken link or anchor.
 
-`url` in `docusaurus.config.ts` points at localhost until the site is
-published.
+## Deploy
+
+The site is published at [grafenodb.org/docs](https://grafenodb.org/docs/),
+under the landing page at `grafenodb.org`, which is deployed apart.
+`docusaurus.config.ts` sets `url: 'https://grafenodb.org'` and
+`baseUrl: '/docs/'`, so every link and file carries `/docs/`.
+
+On Cloudflare it is a Worker with static assets (`wrangler.jsonc`), which
+answers only `grafenodb.org/docs` and what is under it; the rest of the
+domain stays with the landing page. In the Cloudflare project:
+
+| Setting | Value |
+| --- | --- |
+| Build command | `npm run build` |
+| Deploy command | `npx wrangler deploy` |
+| Node version | 20 or later (`NODE_VERSION=22` if needed) |
+
+The build writes into `build/docs/` and the Worker serves `./build`, so a
+request for `/docs/…` finds its file. Unknown paths get the site's
+`404.html`. Images in raw HTML must go through `useBaseUrl` (see
+`docs/intro.md`): a plain `/img/…` path would miss the `/docs/` base.

@@ -5,10 +5,12 @@ title: Introduction
 description: What Grafeno is, what it is for, and what the engine and Grafeno Studio can do.
 ---
 
+import useBaseUrl from '@docusaurus/useBaseUrl';
+
 # Introduction
 
-<a href="/img/grafeno-banner.svg" aria-label="Open the full-resolution Grafeno image">
-  <img className="grafenoHero" src="/img/grafeno-banner.svg" alt="Grafeno: three fused carbon rings in a graphene network" />
+<a href={useBaseUrl('/img/grafeno-banner.svg')} aria-label="Open the full-resolution Grafeno image">
+  <img className="grafenoHero" src={useBaseUrl('/img/grafeno-banner.svg')} alt="Grafeno: three fused carbon rings in a graphene network" />
 </a>
 
 Grafeno is a graph engine written in Rust. It stores entities, documents and facts, keeps where each piece of data came from and when it was true, and assembles context by combining text, vectors and relationships.

@@ -7,8 +7,9 @@ const config: Config = {
   tagline: 'A graph engine for agent memory and knowledge',
   favicon: 'img/grafeno-mark.svg',
 
-  url: 'http://localhost:3000',
-  baseUrl: '/',
+  // Served at grafenodb.org/docs/ (the site's landing page is grafenodb.org).
+  url: 'https://grafenodb.org',
+  baseUrl: '/docs/',
 
   organizationName: 'grafenodb',
   projectName: 'grafeno',

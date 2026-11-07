@@ -5,10 +5,12 @@ title: Introducción
 description: Qué es Grafeno, para qué sirve y qué puede hacer el motor y Grafeno Studio.
 ---
 
+import useBaseUrl from '@docusaurus/useBaseUrl';
+
 # Introducción
 
-<a href="/img/grafeno-banner-es.svg" aria-label="Abrir la imagen de Grafeno en resolución completa">
-  <img className="grafenoHero" src="/img/grafeno-banner-es.svg" alt="Grafeno: tres anillos de carbono fusionados en una red de grafeno" />
+<a href={useBaseUrl('/img/grafeno-banner-es.svg')} aria-label="Abrir la imagen de Grafeno en resolución completa">
+  <img className="grafenoHero" src={useBaseUrl('/img/grafeno-banner-es.svg')} alt="Grafeno: tres anillos de carbono fusionados en una red de grafeno" />
 </a>
 
 Grafeno es un motor de grafos escrito en Rust. Guarda entidades, documentos y hechos, conserva de dónde salió cada dato y cuándo fue cierto, y arma contexto combinando texto, vectores y relaciones.

@@ -1,0 +1,17 @@
+// Grafeno's documentation on Cloudflare, at grafenodb.org/docs/ (the
+// landing page, grafenodb.org, is deployed apart). `npm run build` writes the
+// site into build/docs/, so a request for /docs/… finds its file under
+// ./build. Deploy with `npx wrangler deploy`.
+{
+  "name": "grafeno-docs",
+  "compatibility_date": "2026-11-01",
+  "workers_dev": false,
+  "assets": {
+    "directory": "./build",
+    "not_found_handling": "404-page"
+  },
+  "routes": [
+    { "pattern": "grafenodb.org/docs", "zone_name": "grafenodb.org" },
+    { "pattern": "grafenodb.org/docs/*", "zone_name": "grafenodb.org" }
+  ]
+}
