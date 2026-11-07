@@ -11,7 +11,7 @@ Grafeno comes as two products, installed apart, as PostgreSQL and pgAdmin are:
 - **The engine** (`grafeno`): the database. It runs as a service, has no interface of its own, and is reached through its HTTP API, its console (`grafeno shell`), MCP, or a client library.
 - **Grafeno Studio**: the graphical interface (a desktop app, Grafeno Desktop). It is optional; see [Grafeno Studio](./studio.md).
 
-This page installs the engine. Pick your system.
+This page installs the engine. Pick your system. Every file is also on the [Download](../download.md) page.
 
 ## Windows
 

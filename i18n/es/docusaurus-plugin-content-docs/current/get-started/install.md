@@ -11,7 +11,7 @@ Grafeno son dos productos, que se instalan por separado, como PostgreSQL y pgAdm
 - **El motor** (`grafeno`): la base de datos. Corre como servicio, no tiene interfaz propia y se usa por su API HTTP, su consola (`grafeno shell`), MCP o una biblioteca cliente.
 - **Grafeno Studio**: la interfaz gráfica (una app de escritorio, Grafeno Desktop). Es opcional; ve [Grafeno Studio](./studio.md).
 
-Esta página instala el motor. Elige tu sistema.
+Esta página instala el motor. Elige tu sistema. Todos los archivos están también en la página de [Descargas](../download.md).
 
 ## Windows
 

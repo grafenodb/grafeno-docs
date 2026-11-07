@@ -12,7 +12,7 @@ Viene como app de escritorio, **Grafeno Desktop**, para Windows y Linux. No llev
 
 ## Instálalo
 
-Descárgalo de los [releases de Grafeno Studio](https://github.com/grafenodb/grafeno-studio/releases):
+Descárgalo de la página de [Descargas](../download.md#grafeno-studio) (o de los [releases de Grafeno Studio](https://github.com/grafenodb/grafeno-studio/releases)):
 
 | Sistema | Archivo |
 | --- | --- |

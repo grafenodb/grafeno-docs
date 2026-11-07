@@ -12,7 +12,7 @@ It comes as a desktop app, **Grafeno Desktop**, for Windows and Linux. It has no
 
 ## Install it
 
-Download it from the [Grafeno Studio releases](https://github.com/grafenodb/grafeno-studio/releases):
+Download it from the [Download](../download.md#grafeno-studio) page (or the [Grafeno Studio releases](https://github.com/grafenodb/grafeno-studio/releases)):
 
 | System | File |
 | --- | --- |

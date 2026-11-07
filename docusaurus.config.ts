@@ -76,6 +76,12 @@ const config: Config = {
           label: 'Documentation',
         },
         {
+          type: 'doc',
+          docId: 'download',
+          position: 'left',
+          label: 'Download',
+        },
+        {
           href: 'https://github.com/grafenodb/grafeno',
           label: 'Engine',
           position: 'right',

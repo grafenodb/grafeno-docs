@@ -14,5 +14,9 @@
   "item.label.Engine": {
     "message": "Motor",
     "description": "Navbar item with label Engine"
+  },
+  "item.label.Download": {
+    "message": "Descargas",
+    "description": "Navbar item with label Download"
   }
 }
