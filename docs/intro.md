@@ -145,7 +145,7 @@ The service listens on `127.0.0.1:7810` by default. Persistent settings are in `
 | HTTP server | `grafeno serve` | Applications and Studio. JSON under `/v1/{namespace}/…`. |
 | MCP | `grafeno mcp` | Agents. JSON-RPC over standard input. |
 | Console | `grafeno shell` | GQ queries and administration, on a file or against a server. |
-| TypeScript client | `grafeno-client` | JavaScript applications. Studio uses it. |
+| TypeScript SDK | `@grafenodb/client` (npm) | JavaScript and TypeScript applications. Studio uses it. |
 | Grafeno Studio | Web application, React and Vite | Browse, edit and draw the graph, run GQ, search, maintain memory and administer access. |
 | Grafeno Desktop | Tauri around Studio | The same interface in native windows. It opens database files with the installed engine and talks to every engine over HTTP. |
 

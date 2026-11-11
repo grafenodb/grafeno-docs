@@ -145,7 +145,7 @@ Por defecto el servicio escucha en `127.0.0.1:7810`. La configuración persisten
 | Servidor HTTP | `grafeno serve` | Aplicaciones y Studio. JSON bajo `/v1/{namespace}/…`. |
 | MCP | `grafeno mcp` | Agentes. JSON-RPC por la entrada estándar. |
 | Consola | `grafeno shell` | Consultas GQ y administración, sobre un archivo o contra un servidor. |
-| Cliente TypeScript | `grafeno-client` | Aplicaciones JavaScript. Studio lo usa. |
+| SDK de TypeScript | `@grafenodb/client` (npm) | Aplicaciones JavaScript y TypeScript. Studio lo usa. |
 | Grafeno Studio | Aplicación web, React y Vite | Explorar, editar, dibujar el grafo, ejecutar GQ, buscar, mantener la memoria y administrar el acceso. |
 | Grafeno Desktop | Tauri alrededor de Studio | La misma interfaz en ventanas nativas. Abre archivos de base con el motor instalado y habla con cualquier motor por HTTP. |
 

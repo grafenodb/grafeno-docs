@@ -5,10 +5,16 @@ description: Use Grafeno from JavaScript and TypeScript applications.
 
 # TypeScript client
 
-`grafeno-client` wraps the HTTP API, uses the platform's global `fetch`, and has no runtime dependencies.
+`@grafenodb/client` is Grafeno's TypeScript SDK. It wraps the HTTP API, uses the platform's global `fetch`, and has no runtime dependencies. It runs on Node.js 22.18 or later, and wherever `fetch` exists.
+
+```bash
+npm install @grafenodb/client
+```
+
+Its source, changelog and releases are in [grafenodb/grafeno-sdk](https://github.com/grafenodb/grafeno-sdk/tree/main/typescript); it has its own versions, and works with every engine from 0.1.0 on.
 
 ```ts
-import {Grafeno} from 'grafeno-client';
+import {Grafeno} from '@grafenodb/client';
 
 const grafeno = new Grafeno({
   url: 'http://127.0.0.1:7810',
