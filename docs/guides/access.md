@@ -18,7 +18,7 @@ Run the statements below as the administrator or with the token, for example fro
 
 ## Create a user
 
-```cypher
+```text
 CREATE USER ana SET PASSWORD 'correct-horse-battery';
 ```
 
@@ -28,13 +28,13 @@ Passwords need 12 characters or more. A user with no role can sign in but sees n
 
 A role is a named set of privileges. Give it what a kind of person needs, then give the role to people:
 
-```cypher
+```text
 CREATE ROLE note_taker SET DESCRIPTION 'writes notes';
 GRANT editor ON NAMESPACE notes TO note_taker;
 GRANT ROLE note_taker TO ana;
 ```
 
-```cypher
+```text
 SHOW PRIVILEGES FOR ana;
 ```
 
@@ -55,7 +55,7 @@ grafeno shell --url http://127.0.0.1:7810 --user ana --namespace notes
 
 The console asks for the password. Ana can write notes:
 
-```cypher
+```text
 CREATE (:Note {title: 'mine'});
 ```
 
@@ -75,7 +75,7 @@ In Grafeno Studio, users sign in on the connect screen; over HTTP, with `POST /v
 
 A denial always wins over a grant, so you can give broadly and take back precisely:
 
-```cypher
+```text
 CREATE ROLE analyst;
 GRANT read ON NAMESPACE 'team-*' TO analyst;          // every team-… namespace
 DENY read ON NAMESPACE 'team-secret' TO analyst;      // but this one
@@ -83,14 +83,14 @@ DENY read ON NAMESPACE 'team-secret' TO analyst;      // but this one
 
 Rights reach inside a namespace. What a user may not read is **absent** from every answer — counts, searches, paths, exports — as if it did not exist:
 
-```cypher
+```text
 GRANT read ON NODES Person IN crm TO analyst;           // only Person nodes
 DENY read ON PROPERTY Person.email IN crm TO analyst;   // without their email
 ```
 
 **Record policies** keep each account to the records that match a condition. With one tenant per customer:
 
-```cypher
+```text
 RESTRICT analyst ON NAMESPACE crm NODES Customer WHERE tenant = $account.tenant;
 ALTER USER ana SET ATTRIBUTE tenant = 'acme';
 ```
@@ -115,7 +115,7 @@ That made the service account `indexer`, allowed to write every `team-…` names
 
 ## Manage accounts
 
-```cypher
+```text
 SHOW USERS;
 ALTER USER ana SET STATUS SUSPENDED;      // or ACTIVE; ends her sessions
 ALTER USER ana SET EXPIRES '2027-01-01';  // null: never
@@ -130,7 +130,7 @@ Failed sign-ins lock an account for a while (`[auth]` in the [settings](../refer
 
 Every security event is recorded: sign-ins and failures, lockouts, keys, sessions, changes to accounts and roles, refused requests. An account with the `audit` privilege reads it:
 
-```cypher
+```text
 CALL db.audit(0, 1000) YIELD seq, at, kind, account, target, outcome
 WHERE kind IN ['signin_failed', 'lockout', 'refused']
 RETURN seq, at, kind, account, target ORDER BY seq DESC LIMIT 20;

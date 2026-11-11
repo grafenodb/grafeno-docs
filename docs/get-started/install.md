@@ -6,7 +6,7 @@ sidebar_position: 1
 
 # Install Grafeno
 
-Grafeno comes as two products, installed apart, as PostgreSQL and pgAdmin are:
+Grafeno comes as two products, installed apart, as a database server and its graphical tool usually are:
 
 - **The engine** (`grafeno`): the database. It runs as a service, has no interface of its own, and is reached through its HTTP API, its console (`grafeno shell`), MCP, or a client library.
 - **Grafeno Studio**: the graphical interface (a desktop app, Grafeno Desktop). It is optional; see [Grafeno Studio](./studio.md).
@@ -15,7 +15,7 @@ This page installs the engine. Pick your system. Every file is also on the [Down
 
 ## Windows
 
-Download `grafeno-<version>-windows-x64-setup.exe` from the [releases](https://github.com/grafenodb/grafeno/releases) (or run `winget install GrafenoDB.Grafeno`) and run it. It asks for administrator rights, then, like PostgreSQL's installer:
+Download `grafeno-<version>-windows-x64-setup.exe` from the [releases](https://github.com/grafenodb/grafeno/releases) (or run `winget install GrafenoDB.Grafeno`) and run it. It asks for administrator rights, then:
 
 | Question | Default | What it means |
 | --- | --- | --- |

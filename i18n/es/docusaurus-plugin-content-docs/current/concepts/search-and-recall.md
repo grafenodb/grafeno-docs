@@ -21,7 +21,7 @@ flowchart LR
 
 El texto que pones en `@text` queda indexado. La búsqueda ordena con BM25, la puntuación clásica de relevancia de los buscadores:
 
-```cypher
+```text
 CALL db.search('telemetry', 5) YIELD node, score RETURN node.title, score;
 ```
 
@@ -31,7 +31,7 @@ En la consola: `\search telemetry`. Por HTTP: `POST /v1/{namespace}/search/text`
 
 La búsqueda de texto encuentra palabras; la vectorial encuentra *significado*. Dale a un nodo un embedding — una lista de números que produjo tu modelo de embeddings — y Grafeno encuentra los más cercanos:
 
-```cypher
+```text
 CREATE (:Doc {title: 'cats', @embedding: [1.0, 0.0, 0.0]}),
        (:Doc {title: 'dogs', @embedding: [0.9, 0.1, 0.0]}),
        (:Doc {title: 'cars', @embedding: [0.0, 0.0, 1.0]});

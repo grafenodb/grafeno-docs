@@ -5,11 +5,13 @@ description: A compact reference to Grafeno's graph query language.
 
 # GQ reference
 
-GQ is Grafeno's query language. It resembles Cypher but adds bitemporal facts, memory fields, access statements, and Grafeno-specific procedures.
+GQ is Grafeno's query language: a declarative language of graph patterns, with bitemporal facts, memory fields, access statements, and Grafeno-specific procedures.
+
+This page is a summary. The [GQ tutorial](../gq/index.md) explains each feature with statements and their results.
 
 ## Read
 
-```cypher
+```text
 MATCH (p:Person)-[r:works_at]->(o:Organization)
 WHERE p.city = $city AND r.since >= 2020
 RETURN p.name AS person, o.name AS organization
@@ -21,7 +23,7 @@ Patterns may be directed or undirected. `OPTIONAL MATCH`, `WITH`, `UNWIND`, `UNI
 
 ## Write
 
-```cypher
+```text
 CREATE (p:Person {name: 'Ana'})
 SET p.city = 'Quito'
 RETURN p.@id;
@@ -31,7 +33,7 @@ Use `MERGE` for an idempotent pattern and `DELETE` or `DETACH DELETE` to remove 
 
 ## Query time
 
-```cypher
+```text
 MATCH (p:Person)-[r:works_at]->(o)
 VALID AT '2025-01-01'
 KNOWN AT '2025-02-01'
@@ -53,16 +55,16 @@ Pseudo-properties are engine fields. Regular properties are JSON values and do n
 
 Prefix a query with `EXPLAIN` to see its plan without running it, or `PROFILE` to run it with row and read counts.
 
-```cypher
+```text
 EXPLAIN MATCH (p:Person {email: $email}) RETURN p;
 ```
 
 Create property, text, vector, and fuzzy indexes through GQ. Parameters use `$name`; parameterize values rather than building query strings.
 
-## Important differences from Cypher
+## Choices to know
 
 - Every node must have a label.
 - IDs are UUIDs, not integers.
 - A variable-length traversal reaches each end node once by its shortest matching path.
-- GQ is not the Bolt protocol, so Neo4j drivers do not connect to Grafeno.
-- Unsupported syntax is rejected; compatibility with all of Cypher or GQL is not a goal.
+- Clients connect over the HTTP API or MCP; there is no binary wire protocol.
+- Unsupported syntax is rejected with an error that points at it.

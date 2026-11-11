@@ -12,7 +12,7 @@ A memory that only grows becomes noise: the same person under three spellings, a
 
 Keep the raw material (an episode, a message, a document) as a node with its text, and point derived facts at it with `@sources`. Then every fact can say where it came from.
 
-```cypher
+```text
 CREATE (e:Episode {at: '2026-11-03', @text: 'Ana said she starts at Orbit Labs next month.'});
 
 MATCH (e:Episode {at: '2026-11-03'}), (a:Person {name: 'Ana Torres'}), (o:Company {name: 'Orbit Labs'})
@@ -41,7 +41,7 @@ second time:  {"lines":3,"nodes":0,"edges":0,"duplicates":3,"failed":0}
 
 **Similar text.** A fuzzy index finds names that look alike — typos, accents, case, word order — without comparing with every node:
 
-```cypher
+```text
 CREATE FUZZY INDEX FOR (p:Person) ON (p.name);
 CALL db.searchFuzzy('Person', 'name', 'ana torres', 5) YIELD node, score RETURN node.name, score;
 ```
@@ -71,7 +71,7 @@ curl -X PUT http://127.0.0.1:7810/v1/demo/match-rules/Person -H "Authorization: 
 
 With two people named Ana Torres in the graph — one born in 1990 in Lima, the other in 1985 in Quito — a new record with a typo finds the right one and rules out her namesake:
 
-```cypher
+```text
 CALL db.match('Person', {name: 'Ana Torrez', born_on: '1990-04-12', city: 'Lima'}, 3)
 YIELD node, score, decision RETURN node.city, score, decision;
 ```
@@ -113,7 +113,7 @@ Without `dry_run` it merges and returns a record: `{"id": "…", "kept": "…", 
 
 A person works at one company at a time. Say so once, with a constraint, and a new fact ends the old one in valid time instead of leaving two "current" employers:
 
-```cypher
+```text
 CREATE CONSTRAINT FOR ()-[r:works_at]->() REQUIRE ONE PER SOURCE;
 
 MATCH (a:Person {name: 'Ana Torres'}), (c:Company {name: 'Acme Robotics'})

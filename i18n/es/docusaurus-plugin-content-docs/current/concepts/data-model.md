@@ -13,7 +13,7 @@ Cada nodo tiene al menos una etiqueta y un identificador UUID v7. También puede
 
 Una relación tiene etiqueta, nodo de origen, nodo de destino, propiedades opcionales, fuentes y campos temporales.
 
-```cypher
+```text
 CREATE (p:Person {name: 'Ana', city: 'Quito'})
 CREATE (d:Document {title: 'Entrevista', @text: 'Ana ingresó al hospital.'})
 CREATE (d)-[:mentions]->(p);
@@ -36,7 +36,7 @@ Grafeno distingue:
 
 `VALID AT` reconstruye el mundo en un momento. `KNOWN AT` reconstruye lo que la base sabía entonces. Invalidar una relación indica que el mundo cambió; retractarla indica que el hecho registrado era incorrecto.
 
-```cypher
+```text
 MATCH (p:Person)-[:works_at]->(o)
 VALID AT '2024-06-01'
 RETURN p.name, o.name;

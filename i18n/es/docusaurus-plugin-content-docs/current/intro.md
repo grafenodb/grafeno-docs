@@ -17,7 +17,7 @@ Grafeno es un motor de grafos escrito en Rust. Guarda entidades, documentos y he
 
 Es memoria y base de conocimiento de agentes. Una aplicación puede usarlo embebido, por HTTP o por MCP.
 
-Grafeno es solo el motor, como lo es PostgreSQL. El binario `grafeno` ofrece la API HTTP, el servidor MCP, la consola y los comandos de administración. **Grafeno Studio**, la interfaz, es otro producto que se conecta a un motor por esa API, como cualquier otro cliente.
+Grafeno es solo el motor, como lo es un servidor de bases de datos. El binario `grafeno` ofrece la API HTTP, el servidor MCP, la consola y los comandos de administración. **Grafeno Studio**, la interfaz, es otro producto que se conecta a un motor por esa API, como cualquier otro cliente.
 
 :::tip ¿Eres nuevo? Sigue la guía en orden
 1. [Instalar Grafeno](./get-started/install.md) — el motor, en Windows o Linux, en unos minutos.
@@ -82,7 +82,7 @@ Nodos y relaciones guardan `sources`: los nodos de los que provienen, como un ep
 
 ### GQ
 
-GQ es el lenguaje de consulta. Se parece a Cypher y añade el tiempo, la retractación y pseudo-propiedades para lo que no es una propiedad (`@id`, `@text`, `@embedding`, `@valid_from`, `@recorded_by`, …). Corre en la consola, en `POST /v1/{namespace}/query`, en la herramienta MCP `query` (solo lectura) y desde Rust.
+GQ es el lenguaje de consulta: un lenguaje declarativo de patrones de grafos, con el tiempo, la retractación y pseudo-propiedades para lo que no es una propiedad (`@id`, `@text`, `@embedding`, `@valid_from`, `@recorded_by`, …). Corre en la consola, en `POST /v1/{namespace}/query`, en la herramienta MCP `query` (solo lectura) y desde Rust.
 
 ```text
 CREATE (a:Person {name: 'Ana'})
@@ -97,7 +97,7 @@ VALID AT '2024-06-01'
 RETURN p.name, o.name, r.@valid_from;
 ```
 
-Cubre patrones, filtros, agregaciones, escrituras, `OPTIONAL MATCH`, `MERGE`, `WITH`, `UNWIND` y `UNION`, además de índices y algoritmos de caminos, centralidad, comunidades y similitud. No es Cypher completo. Tres diferencias importan desde el principio: todo nodo lleva etiqueta; un camino de longitud variable llega a cada nodo destino una sola vez, por el camino más corto; el id es un UUID, no un entero. Los drivers de Neo4j no conectan: no hay protocolo Bolt.
+Cubre patrones, filtros, agregaciones, escrituras, `OPTIONAL MATCH`, `MERGE`, `WITH`, `UNWIND` y `UNION`, además de índices y algoritmos de caminos, centralidad, comunidades y similitud. Tres decisiones importan desde el principio: todo nodo lleva etiqueta; un camino de longitud variable llega a cada nodo destino una sola vez, por el camino más corto; el id es un UUID, no un entero. Los clientes se conectan por la API HTTP o MCP: no hay protocolo binario.
 
 La referencia completa sigue en el repositorio del motor, en [`docs/query-language.md`](https://github.com/grafenodb/grafeno/blob/main/docs/query-language.md), hasta que pase a este sitio.
 
@@ -129,7 +129,7 @@ Sin token y sin cuentas, quien alcance el puerto entra. El primer alta tiene que
 
 ### Clúster
 
-Varios procesos `grafeno` se sincronizan con Raft, dentro del propio binario: no hace falta etcd ni ZooKeeper. Hay elección de líder, recuperación ante fallos, lecturas linealizables y lecturas grandes repartidas entre miembros. Cada grupo replica bases enteras y, como mucho, coloca namespaces enteros en grupos distintos.
+Varios procesos `grafeno` se sincronizan con Raft, dentro del propio binario: no hace falta un servicio de coordinación aparte. Hay elección de líder, recuperación ante fallos, lecturas linealizables y lecturas grandes repartidas entre miembros. Cada grupo replica bases enteras y, como mucho, coloca namespaces enteros en grupos distintos.
 
 ### Operación
 
@@ -141,7 +141,7 @@ Por defecto el servicio escucha en `127.0.0.1:7810`. La configuración persisten
 
 | Forma | Entrada | Cuándo |
 | --- | --- | --- |
-| Biblioteca Rust | Crates `grafeno` y `grafeno-memory` | Dentro del mismo proceso, como se embebe SQLite. |
+| Biblioteca Rust | Crates `grafeno` y `grafeno-memory` | Dentro del mismo proceso, como una base de datos embebida. |
 | Servidor HTTP | `grafeno serve` | Aplicaciones y Studio. JSON bajo `/v1/{namespace}/…`. |
 | MCP | `grafeno mcp` | Agentes. JSON-RPC por la entrada estándar. |
 | Consola | `grafeno shell` | Consultas GQ y administración, sobre un archivo o contra un servidor. |
@@ -202,7 +202,7 @@ La versión del workspace es 0.1.0. Rust del workspace: edition 2024, rust-versi
 
 - No calcula embeddings. Los manda el cliente.
 - No es un almacén distribuido de un solo namespace partido en trozos.
-- No habla Bolt, ni pretende cubrir todo Cypher o GQL.
+- No tiene protocolo binario, y GQ crece con lo que hace falta en vez de cubrir toda forma de consulta posible.
 - No trae una interfaz integrada. Studio es un cliente separado.
 - No elige el modelo de lenguaje. La extracción queda fuera del núcleo.
 
@@ -211,5 +211,7 @@ La versión del workspace es 0.1.0. Rust del workspace: edition 2024, rust-versi
 Este sitio, `grafeno-docs`, es la documentación del producto, aparte del repositorio del motor y del de Studio. Esta introducción es la primera página. El sitio está en inglés, y el español se elige en el menú de idioma.
 
 Continúa con [Instalar Grafeno](./get-started/install.md) y [Tu primer grafo](./get-started/first-graph.md), o elige una integración mediante la [API HTTP](./guides/http-api.md), [MCP](./guides/mcp.md) o el [cliente TypeScript](./clients/typescript.md).
+
+Para aprender el lenguaje de consultas una función a la vez, sigue el [tutorial de GQ](./gq/index.md): cada página muestra una sentencia y la respuesta que da el motor. [Vectores](./vectors/index.md) trata los embeddings, los índices vectoriales y cómo dimensionarlos, y [Algoritmos de grafos](./algorithms/index.md) tiene un ejemplo resuelto de cada uno de los 40 algoritmos.
 
 Grafeno se desarrolla en la [organización grafenodb](https://github.com/grafenodb). El símbolo son tres anillos de carbono de una red de grafeno.

@@ -63,7 +63,7 @@ grafeno export --db memory.redb -n demo -o demo.jsonl
 grafeno import --db other.redb demo.jsonl
 ```
 
-Un namespace también puede salir como CSV (`--format csv`: `nodes.csv` y `edges.csv`, en el formato que lee `neo4j-admin import`) o GraphML (`--format graphml`), y entrar desde ellos.
+Un namespace también puede salir como CSV (`--format csv`: `nodes.csv` y `edges.csv`, con encabezados tipados como `name:int` y `:LABEL`) o GraphML (`--format graphml`), y entrar desde ellos.
 
 | | Respaldo | Exportación |
 | --- | --- | --- |

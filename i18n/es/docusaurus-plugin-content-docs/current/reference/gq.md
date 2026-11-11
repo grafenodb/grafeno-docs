@@ -5,11 +5,13 @@ description: Una referencia compacta del lenguaje de consultas de Grafeno.
 
 # Referencia de GQ
 
-GQ es el lenguaje de consultas de Grafeno. Se parece a Cypher y añade hechos bitemporales, campos de memoria, sentencias de acceso y procedimientos propios.
+GQ es el lenguaje de consultas de Grafeno: un lenguaje declarativo de patrones de grafos, con hechos bitemporales, campos de memoria, sentencias de acceso y procedimientos propios.
+
+Esta página es un resumen. El [tutorial de GQ](../gq/index.md) explica cada función con sentencias y sus resultados.
 
 ## Leer
 
-```cypher
+```text
 MATCH (p:Person)-[r:works_at]->(o:Organization)
 WHERE p.city = $city AND r.since >= 2020
 RETURN p.name AS person, o.name AS organization
@@ -21,7 +23,7 @@ Los patrones pueden ser dirigidos o no dirigidos. Se admiten `OPTIONAL MATCH`, `
 
 ## Escribir
 
-```cypher
+```text
 CREATE (p:Person {name: 'Ana'})
 SET p.city = 'Quito'
 RETURN p.@id;
@@ -31,7 +33,7 @@ Usa `MERGE` para un patrón idempotente y `DELETE` o `DETACH DELETE` para elimin
 
 ## Consultar el tiempo
 
-```cypher
+```text
 MATCH (p:Person)-[r:works_at]->(o)
 VALID AT '2025-01-01'
 KNOWN AT '2025-02-01'
@@ -53,16 +55,16 @@ Las pseudopropiedades son campos del motor. Las propiedades normales son valores
 
 Antepón `EXPLAIN` para ver el plan sin ejecutar una consulta, o `PROFILE` para ejecutarla con cantidades de filas y lecturas.
 
-```cypher
+```text
 EXPLAIN MATCH (p:Person {email: $email}) RETURN p;
 ```
 
 Crea índices de propiedades, texto, vectores y búsqueda aproximada mediante GQ. Los parámetros usan `$nombre`; parametriza los valores en vez de construir cadenas de consulta.
 
-## Diferencias importantes con Cypher
+## Decisiones que conviene conocer
 
 - Cada nodo debe tener una etiqueta.
 - Los identificadores son UUID, no enteros.
 - Un recorrido de longitud variable alcanza cada nodo final una vez, por su camino coincidente más corto.
-- GQ no es el protocolo Bolt; los drivers de Neo4j no se conectan a Grafeno.
-- La sintaxis no compatible se rechaza; cubrir todo Cypher o GQL no es un objetivo.
+- Los clientes se conectan por la API HTTP o MCP; no hay protocolo binario.
+- La sintaxis no admitida se rechaza con un error que la señala.

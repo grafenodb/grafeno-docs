@@ -10,7 +10,7 @@ In fifteen minutes you will build a small graph of people and the companies they
 
 ## 1. Open the console
 
-`grafeno shell` is Grafeno's console, like `psql` for PostgreSQL. Connect it to the engine you installed, with the settings file (it holds the address and the token):
+`grafeno shell` is Grafeno's console. Connect it to the engine you installed, with the settings file (it holds the address and the token):
 
 ```bash
 sudo grafeno shell --config /etc/grafeno/grafeno.toml
@@ -42,9 +42,9 @@ Created namespace "demo"; now on it.
 
 ## 3. Create nodes
 
-Nodes are the things: people, companies, notes. Each has at least one **label** (`Person`, `Company`) and **properties**. Grafeno's query language is **GQ**, close to Cypher:
+Nodes are the things: people, companies, notes. Each has at least one **label** (`Person`, `Company`) and **properties**. Grafeno's query language is **GQ**, a declarative language of graph patterns:
 
-```cypher
+```text
 CREATE (ana:Person {name: 'Ana Torres', role: 'engineer'}),
        (bob:Person {name: 'Bob Rivera', role: 'designer'}),
        (acme:Company {name: 'Acme Robotics', city: 'Lima'}),
@@ -59,7 +59,7 @@ CREATE (ana:Person {name: 'Ana Torres', role: 'engineer'}),
 
 Relationships between nodes are **facts**. A fact can say since when it is true (`@valid_from`) and until when (`@valid_to`). Ana joined Acme in March 2021, Bob in June 2022, and Ana knows Bob:
 
-```cypher
+```text
 MATCH (ana:Person {name: 'Ana Torres'}), (acme:Company {name: 'Acme Robotics'})
 CREATE (ana)-[:works_at {@valid_from: '2021-03-01'}]->(acme);
 
@@ -74,7 +74,7 @@ CREATE (ana)-[:knows {since: 2022}]->(bob);
 
 `MATCH` describes a shape to find; `RETURN` says what to show:
 
-```cypher
+```text
 MATCH (p:Person)-[w:works_at]->(c:Company)
 RETURN p.name, c.name, date(w.@valid_from) AS since
 ORDER BY since;
@@ -90,7 +90,7 @@ ORDER BY since;
 
 Patterns can go several steps. Where do the people Ana knows work?
 
-```cypher
+```text
 MATCH (:Person {name: 'Ana Torres'})-[:knows]->(friend)-[:works_at]->(c)
 RETURN friend.name, c.name;
 ```
@@ -106,7 +106,7 @@ RETURN friend.name, c.name;
 
 Ana leaves Acme at the end of January 2025 and joins Orbit Labs. Instead of deleting the old fact, end it, then record the new one:
 
-```cypher
+```text
 MATCH (:Person {name: 'Ana Torres'})-[w:works_at]->(:Company {name: 'Acme Robotics'})
 SET w.@valid_to = '2025-01-31';
 
@@ -116,7 +116,7 @@ CREATE (ana)-[:works_at {@valid_from: '2025-02-01'}]->(orbit);
 
 Both facts are still there, each with its period:
 
-```cypher
+```text
 MATCH (:Person {name: 'Ana Torres'})-[w:works_at]->(c)
 RETURN c.name, date(w.@valid_from) AS since, date(w.@valid_to) AS until
 ORDER BY since;
@@ -138,7 +138,7 @@ A person works at one company at a time. Declare it once, and a new job ends the
 
 `VALID AT` asks what was true at a moment. Where did Ana work in mid-2023, and where does she work now?
 
-```cypher
+```text
 MATCH (:Person {name: 'Ana Torres'})-[:works_at]->(c) VALID AT '2023-06-01' RETURN c.name;
 ```
 
@@ -149,7 +149,7 @@ MATCH (:Person {name: 'Ana Torres'})-[:works_at]->(c) VALID AT '2023-06-01' RETU
 (1 row)
 ```
 
-```cypher
+```text
 MATCH (:Person {name: 'Ana Torres'})-[:works_at]->(c) VALID AT datetime() RETURN c.name;
 ```
 
@@ -166,14 +166,14 @@ Grafeno keeps a second time too: when it *learned* each fact. That one answers "
 
 A node can carry a text (`@text`), which Grafeno indexes for full-text search:
 
-```cypher
+```text
 CREATE (:Note {title: 'Robot arm review',
                @text: 'Ana and Bob reviewed the new robot arm design for Acme. The gripper needs a softer grip for fragile parts.'});
 CREATE (:Note {title: 'Hiring plan',
                @text: 'Orbit Labs is hiring two engineers to work on satellite telemetry.'});
 ```
 
-```cypher
+```text
 CALL db.search('telemetry', 5) YIELD node, score RETURN node.title, score;
 ```
 
@@ -196,7 +196,7 @@ Ana and Bob reviewed the new robot arm design for Acme. The gripper needs a soft
 
 ## 9. Look around
 
-```cypher
+```text
 CALL db.labels();
 ```
 

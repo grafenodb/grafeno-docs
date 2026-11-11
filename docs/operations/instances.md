@@ -6,7 +6,7 @@ sidebar_position: 2
 
 # Instances, upgrades and checks
 
-An **instance** is one engine: a settings file, a data folder and a service. The packages create the default one when they install; you can run more side by side, as PostgreSQL runs several clusters.
+An **instance** is one engine: a settings file, a data folder and a service. The packages create the default one when they install; you can run more side by side, each a database server of its own.
 
 ## See your instances
 
@@ -30,7 +30,7 @@ On Windows there is one instance, the `Grafeno` service, with its settings in `C
 
 ## Add an instance: `grafeno setup`
 
-`grafeno setup` initializes an instance, as `initdb` does for PostgreSQL. It asks what it needs:
+`grafeno setup` initializes an instance. It asks what it needs:
 
 ```bash
 sudo grafeno setup --instance team

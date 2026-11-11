@@ -19,14 +19,14 @@ Valid time is yours to set (it defaults to "from now on"). Record time is set by
 
 Ana worked at Acme until January 2025. The fact was true then; it is not true now. End it in valid time:
 
-```cypher
+```text
 MATCH (:Person {name: 'Ana Torres'})-[w:works_at]->(:Company {name: 'Acme Robotics'})
 SET w.@valid_to = '2025-01-31';
 ```
 
 The fact stays, with its period. `VALID AT` asks what was true at a moment:
 
-```cypher
+```text
 MATCH (:Person {name: 'Ana Torres'})-[:works_at]->(c) VALID AT '2023-06-01' RETURN c.name;   // Acme Robotics
 MATCH (:Person {name: 'Ana Torres'})-[:works_at]->(c) VALID AT datetime() RETURN c.name;     // Orbit Labs
 ```
@@ -37,13 +37,13 @@ Without `VALID AT`, a `MATCH` sees every fact that was not retracted, whatever i
 
 Someone recorded that Ana lives in Cusco. She never did: it was a mistake. That is not the world changing, so do not end it — **retract** it:
 
-```cypher
+```text
 MATCH (:Person {name: 'Ana Torres'})-[r:lives_in]->() RETRACT r;
 ```
 
 A retracted fact disappears from current knowledge:
 
-```cypher
+```text
 MATCH (:Person {name: 'Ana Torres'})-[:lives_in]->(c) RETURN c.name;
 ```
 
@@ -55,7 +55,7 @@ MATCH (:Person {name: 'Ana Torres'})-[:lives_in]->(c) RETURN c.name;
 
 But Grafeno remembers that it believed it. `KNOWN AT` shows what Grafeno knew at a moment, before the correction:
 
-```cypher
+```text
 MATCH (:Person {name: 'Ana Torres'})-[r:lives_in]->(c)
 KNOWN AT '2026-11-07T15:09:11Z'
 RETURN c.name, r.@recorded_at, r.@expired_at;
@@ -87,12 +87,12 @@ Anywhere a time goes (`@valid_from`, `VALID AT`, `KNOWN AT`), Grafeno takes an I
 
 A node's property can keep its earlier values. Declare it **functional** and every change is remembered:
 
-```cypher
+```text
 CREATE CONSTRAINT FOR (p:Person) REQUIRE p.city IS FUNCTIONAL;
 ```
 
 After `SET p.city = 'Quito'` on someone who lived in Lima, `p.city` is `'Quito'`, and `history(p, 'city')` returns the earlier values as a list of `{value, from, to, by}`, oldest first:
 
-```cypher
+```text
 MATCH (p:Person {name: 'Ana'}) RETURN [h IN history(p, 'city') | h.value] AS cities;   // [Lima]
 ```

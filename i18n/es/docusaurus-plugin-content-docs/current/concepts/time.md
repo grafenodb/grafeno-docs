@@ -19,14 +19,14 @@ El tiempo válido lo pones tú (por defecto, "desde ahora"). El de registro lo p
 
 Ana trabajó en Acme hasta enero de 2025. El hecho fue cierto entonces; ahora no lo es. Termínalo en tiempo válido:
 
-```cypher
+```text
 MATCH (:Person {name: 'Ana Torres'})-[w:works_at]->(:Company {name: 'Acme Robotics'})
 SET w.@valid_to = '2025-01-31';
 ```
 
 El hecho queda, con su período. `VALID AT` pregunta qué era cierto en un momento:
 
-```cypher
+```text
 MATCH (:Person {name: 'Ana Torres'})-[:works_at]->(c) VALID AT '2023-06-01' RETURN c.name;   // Acme Robotics
 MATCH (:Person {name: 'Ana Torres'})-[:works_at]->(c) VALID AT datetime() RETURN c.name;     // Orbit Labs
 ```
@@ -37,13 +37,13 @@ Sin `VALID AT`, un `MATCH` ve todos los hechos que no fueron retractados, sea cu
 
 Alguien registró que Ana vive en Cusco. Nunca vivió ahí: fue un error. Eso no es que el mundo cambió, así que no lo termines — **retráctalo**:
 
-```cypher
+```text
 MATCH (:Person {name: 'Ana Torres'})-[r:lives_in]->() RETRACT r;
 ```
 
 Un hecho retractado desaparece del conocimiento actual:
 
-```cypher
+```text
 MATCH (:Person {name: 'Ana Torres'})-[:lives_in]->(c) RETURN c.name;
 ```
 
@@ -55,7 +55,7 @@ MATCH (:Person {name: 'Ana Torres'})-[:lives_in]->(c) RETURN c.name;
 
 Pero Grafeno recuerda que lo creyó. `KNOWN AT` muestra lo que sabía en un momento, antes de la corrección:
 
-```cypher
+```text
 MATCH (:Person {name: 'Ana Torres'})-[r:lives_in]->(c)
 KNOWN AT '2026-11-07T15:09:11Z'
 RETURN c.name, r.@recorded_at, r.@expired_at;
@@ -87,12 +87,12 @@ Donde va un tiempo (`@valid_from`, `VALID AT`, `KNOWN AT`), Grafeno acepta una f
 
 Una propiedad de un nodo puede conservar sus valores anteriores. Declárala **funcional** y cada cambio queda recordado:
 
-```cypher
+```text
 CREATE CONSTRAINT FOR (p:Person) REQUIRE p.city IS FUNCTIONAL;
 ```
 
 Tras `SET p.city = 'Quito'` en alguien que vivía en Lima, `p.city` es `'Quito'`, y `history(p, 'city')` devuelve los valores anteriores como una lista de `{value, from, to, by}`, del más antiguo al más reciente:
 
-```cypher
+```text
 MATCH (p:Person {name: 'Ana'}) RETURN [h IN history(p, 'city') | h.value] AS cities;   // [Lima]
 ```

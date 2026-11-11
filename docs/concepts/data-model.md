@@ -13,7 +13,7 @@ Every node has at least one label and a UUID v7 identifier. It may also contain 
 
 A relationship has a label, a source node, a target node, optional properties, sources, and time fields.
 
-```cypher
+```text
 CREATE (p:Person {name: 'Ana', city: 'Quito'})
 CREATE (d:Document {title: 'Interview', @text: 'Ana joined the hospital.'})
 CREATE (d)-[:mentions]->(p);
@@ -36,7 +36,7 @@ Grafeno distinguishes:
 
 `VALID AT` reconstructs the world at a time. `KNOWN AT` reconstructs what the database knew then. Invalidating a relationship says the world changed; retracting it says the recorded fact was wrong.
 
-```cypher
+```text
 MATCH (p:Person)-[:works_at]->(o)
 VALID AT '2024-06-01'
 RETURN p.name, o.name;

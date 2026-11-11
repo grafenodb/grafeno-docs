@@ -14,6 +14,9 @@ language; Spanish is the other locale, at `/es/`.
 | --- | --- |
 | `docs/get-started` | Install Grafeno, your first graph, Grafeno Studio |
 | `docs/concepts` | The data model, time, search and recall |
+| `docs/gq` | The GQ tutorial: one page per feature, each statement with its result |
+| `docs/vectors` | Embeddings, vector indexes, hybrid search, sizing |
+| `docs/algorithms` | Every graph algorithm, with a worked example |
 | `docs/guides` | GQ scripts, memory for agents, users and roles, the HTTP API, MCP |
 | `docs/clients` | The TypeScript client |
 | `docs/operations` | The command line, instances and upgrades, backups, a cluster |
@@ -22,6 +25,24 @@ language; Spanish is the other locale, at `/es/`.
 
 Every example and every result shown was run against the engine before it
 was written down: keep it that way when adding pages.
+
+## Examples that run
+
+A fence written ` ```text run ` holds GQ statements; `tools/run-examples.mjs`
+runs every such fence of a page against a real engine (in memory, one
+engine per page, so pages never see each other's data) and writes what the
+console printed into the ` ```text result ` fence after it. Results are
+never typed by hand:
+
+```bash
+node tools/run-examples.mjs                       # every page, both languages
+node tools/run-examples.mjs docs/gq/match.md      # one page
+node tools/run-examples.mjs --check               # change nothing; fail if a result differs
+```
+
+It uses the engine's debug build next to this repository
+(`../grafeno/target/debug/grafeno`), or `GRAFENO_BIN`. Results that hold
+ids, times or milliseconds change at each run.
 
 ## Run
 

@@ -12,7 +12,7 @@ Una memoria que solo crece se vuelve ruido: la misma persona escrita de tres for
 
 Guarda el material crudo (un episodio, un mensaje, un documento) como un nodo con su texto, y apunta a él los hechos derivados con `@sources`. Así cada hecho puede decir de dónde salió.
 
-```cypher
+```text
 CREATE (e:Episode {at: '2026-11-03', @text: 'Ana said she starts at Orbit Labs next month.'});
 
 MATCH (e:Episode {at: '2026-11-03'}), (a:Person {name: 'Ana Torres'}), (o:Company {name: 'Orbit Labs'})
@@ -41,7 +41,7 @@ segunda vez:  {"lines":3,"nodes":0,"edges":0,"duplicates":3,"failed":0}
 
 **Texto parecido.** Un índice fuzzy encuentra nombres parecidos — errores de tipeo, tildes, mayúsculas, orden de las palabras — sin comparar con cada nodo:
 
-```cypher
+```text
 CREATE FUZZY INDEX FOR (p:Person) ON (p.name);
 CALL db.searchFuzzy('Person', 'name', 'ana torres', 5) YIELD node, score RETURN node.name, score;
 ```
@@ -71,7 +71,7 @@ curl -X PUT http://127.0.0.1:7810/v1/demo/match-rules/Person -H "Authorization: 
 
 Con dos personas llamadas Ana Torres en el grafo — una nacida en 1990 en Lima, la otra en 1985 en Quito — un registro nuevo con un error de tipeo encuentra a la correcta y descarta a su homónima:
 
-```cypher
+```text
 CALL db.match('Person', {name: 'Ana Torrez', born_on: '1990-04-12', city: 'Lima'}, 3)
 YIELD node, score, decision RETURN node.city, score, decision;
 ```
@@ -113,7 +113,7 @@ Sin `dry_run`, fusiona y devuelve un registro: `{"id": "…", "kept": "…", "me
 
 Una persona trabaja en una empresa a la vez. Dilo una vez, con una restricción, y un hecho nuevo termina el viejo en tiempo válido en vez de dejar dos empleadores "actuales":
 
-```cypher
+```text
 CREATE CONSTRAINT FOR ()-[r:works_at]->() REQUIRE ONE PER SOURCE;
 
 MATCH (a:Person {name: 'Ana Torres'}), (c:Company {name: 'Acme Robotics'})

@@ -6,7 +6,7 @@ sidebar_position: 3
 
 # Grafeno Studio
 
-Grafeno Studio es la interfaz gráfica de Grafeno: recorre y edita el grafo, lo dibuja, ejecuta scripts GQ, busca, cuida la memoria y administra usuarios y roles. Es un producto aparte del motor, se instala por su cuenta y habla con los motores solo por su API HTTP — como pgAdmin junto a PostgreSQL.
+Grafeno Studio es la interfaz gráfica de Grafeno: recorre y edita el grafo, lo dibuja, ejecuta scripts GQ, busca, cuida la memoria y administra usuarios y roles. Es un producto aparte del motor, se instala por su cuenta y habla con los motores solo por su API HTTP, como cualquier otro cliente.
 
 Viene como app de escritorio, **Grafeno Desktop**, para Windows y Linux. No lleva motor dentro: usa el motor que [instalaste](./install.md).
 

@@ -18,7 +18,7 @@ Ejecuta las sentencias de abajo como administrador o con el token, por ejemplo d
 
 ## Crea un usuario
 
-```cypher
+```text
 CREATE USER ana SET PASSWORD 'correct-horse-battery';
 ```
 
@@ -28,13 +28,13 @@ Las contraseñas necesitan 12 caracteres o más. Un usuario sin rol puede inicia
 
 Un rol es un conjunto de privilegios con nombre. Dale lo que necesita un tipo de persona, y luego dale el rol a las personas:
 
-```cypher
+```text
 CREATE ROLE note_taker SET DESCRIPTION 'writes notes';
 GRANT editor ON NAMESPACE notes TO note_taker;
 GRANT ROLE note_taker TO ana;
 ```
 
-```cypher
+```text
 SHOW PRIVILEGES FOR ana;
 ```
 
@@ -55,7 +55,7 @@ grafeno shell --url http://127.0.0.1:7810 --user ana --namespace notes
 
 La consola pide la contraseña. Ana puede escribir notas:
 
-```cypher
+```text
 CREATE (:Note {title: 'mine'});
 ```
 
@@ -75,7 +75,7 @@ En Grafeno Studio, los usuarios inician sesión en la pantalla de conexión; por
 
 Una denegación siempre gana sobre una concesión, así puedes dar en general y quitar con precisión:
 
-```cypher
+```text
 CREATE ROLE analyst;
 GRANT read ON NAMESPACE 'team-*' TO analyst;          // todos los namespaces team-…
 DENY read ON NAMESPACE 'team-secret' TO analyst;      // menos este
@@ -83,14 +83,14 @@ DENY read ON NAMESPACE 'team-secret' TO analyst;      // menos este
 
 Los permisos llegan dentro de un namespace. Lo que un usuario no puede leer está **ausente** de toda respuesta — conteos, búsquedas, caminos, exportaciones — como si no existiera:
 
-```cypher
+```text
 GRANT read ON NODES Person IN crm TO analyst;           // solo los nodos Person
 DENY read ON PROPERTY Person.email IN crm TO analyst;   // sin su email
 ```
 
 Las **políticas de registros** limitan cada cuenta a los registros que cumplen una condición. Con un inquilino por cliente:
 
-```cypher
+```text
 RESTRICT analyst ON NAMESPACE crm NODES Customer WHERE tenant = $account.tenant;
 ALTER USER ana SET ATTRIBUTE tenant = 'acme';
 ```
@@ -117,7 +117,7 @@ Los usuarios también pueden crear sus propias claves, limitadas a algunos names
 
 ## Administra las cuentas
 
-```cypher
+```text
 SHOW USERS;
 ALTER USER ana SET STATUS SUSPENDED;      // o ACTIVE; termina sus sesiones
 ALTER USER ana SET EXPIRES '2027-01-01';  // null: nunca
@@ -132,7 +132,7 @@ Los inicios de sesión fallidos bloquean una cuenta por un rato (`[auth]` en la 
 
 Cada evento de seguridad queda registrado: inicios de sesión y sus fallos, bloqueos, claves, sesiones, cambios en cuentas y roles, solicitudes rechazadas. Una cuenta con el privilegio `audit` lo lee:
 
-```cypher
+```text
 CALL db.audit(0, 1000) YIELD seq, at, kind, account, target, outcome
 WHERE kind IN ['signin_failed', 'lockout', 'refused']
 RETURN seq, at, kind, account, target ORDER BY seq DESC LIMIT 20;

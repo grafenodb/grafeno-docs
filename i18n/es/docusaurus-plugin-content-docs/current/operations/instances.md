@@ -6,7 +6,7 @@ sidebar_position: 2
 
 # Instancias, actualizaciones y revisiones
 
-Una **instancia** es un motor: un archivo de configuración, una carpeta de datos y un servicio. Los paquetes crean la instancia por defecto al instalarse; puedes correr más, una al lado de otra, como PostgreSQL corre varios clústeres.
+Una **instancia** es un motor: un archivo de configuración, una carpeta de datos y un servicio. Los paquetes crean la instancia por defecto al instalarse; puedes correr más, una al lado de otra, cada una un servidor de bases de datos propio.
 
 ## Mira tus instancias
 
@@ -30,7 +30,7 @@ En Windows hay una instancia, el servicio `Grafeno`, con su configuración en `C
 
 ## Agrega una instancia: `grafeno setup`
 
-`grafeno setup` inicializa una instancia, como `initdb` en PostgreSQL. Pregunta lo que necesita:
+`grafeno setup` inicializa una instancia. Pregunta lo que necesita:
 
 ```bash
 sudo grafeno setup --instance team

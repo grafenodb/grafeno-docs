@@ -26,5 +26,41 @@
   "sidebar.docs.category.Reference": {
     "message": "Referencia",
     "description": "The label for category 'Reference' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.GQ tutorial": {
+    "message": "Tutorial de GQ",
+    "description": "The label for category 'GQ tutorial' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Basics": {
+    "message": "Lo básico",
+    "description": "The label for category 'Basics' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Changing data": {
+    "message": "Cambiar datos",
+    "description": "The label for category 'Changing data' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Combining queries": {
+    "message": "Combinar consultas",
+    "description": "The label for category 'Combining queries' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Values and functions": {
+    "message": "Valores y funciones",
+    "description": "The label for category 'Values and functions' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Search": {
+    "message": "Búsqueda",
+    "description": "The label for category 'Search' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Schema and operation": {
+    "message": "Esquema y operación",
+    "description": "The label for category 'Schema and operation' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Vectors": {
+    "message": "Vectores",
+    "description": "The label for category 'Vectors' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Graph algorithms": {
+    "message": "Algoritmos de grafos",
+    "description": "The label for category 'Graph algorithms' in sidebar 'docs'"
   }
 }

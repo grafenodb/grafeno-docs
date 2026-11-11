@@ -17,7 +17,7 @@ Grafeno is a graph engine written in Rust. It stores entities, documents and fac
 
 It is memory and a knowledge base for agents. An application can use it embedded, over HTTP, or over MCP.
 
-Grafeno is the engine alone, as PostgreSQL is. The `grafeno` binary serves the HTTP API, the MCP server, the console and the administration commands. **Grafeno Studio**, the interface, is a separate product that connects to an engine through that API, like any other client.
+Grafeno is the engine alone, as a database server is. The `grafeno` binary serves the HTTP API, the MCP server, the console and the administration commands. **Grafeno Studio**, the interface, is a separate product that connects to an engine through that API, like any other client.
 
 :::tip New here? Follow the guide in order
 1. [Install Grafeno](./get-started/install.md) — the engine, on Windows or Linux, in a few minutes.
@@ -82,7 +82,7 @@ Nodes and relationships keep `sources`: the nodes they came from, such as an epi
 
 ### GQ
 
-GQ is the query language. It is close to Cypher and adds time, retraction and pseudo-properties for what is not a property (`@id`, `@text`, `@embedding`, `@valid_from`, `@recorded_by`, and others). It runs in the console, at `POST /v1/{namespace}/query`, in the read-only MCP tool `query`, and from Rust.
+GQ is the query language: a declarative language of graph patterns, with time, retraction and pseudo-properties for what is not a property (`@id`, `@text`, `@embedding`, `@valid_from`, `@recorded_by`, and others). It runs in the console, at `POST /v1/{namespace}/query`, in the read-only MCP tool `query`, and from Rust.
 
 ```text
 CREATE (a:Person {name: 'Ana'})
@@ -97,7 +97,7 @@ VALID AT '2024-06-01'
 RETURN p.name, o.name, r.@valid_from;
 ```
 
-It covers patterns, filters, aggregates, writes, `OPTIONAL MATCH`, `MERGE`, `WITH`, `UNWIND` and `UNION`, plus indexes and algorithms for paths, centrality, communities and similarity. It is not full Cypher. Three differences matter from the start: every node needs a label; a variable-length path reaches each end node once, by the shortest path; the id is a UUID, not an integer. Neo4j drivers cannot connect: there is no Bolt protocol.
+It covers patterns, filters, aggregates, writes, `OPTIONAL MATCH`, `MERGE`, `WITH`, `UNWIND` and `UNION`, plus indexes and algorithms for paths, centrality, communities and similarity. Three choices matter from the start: every node needs a label; a variable-length path reaches each end node once, by the shortest path; the id is a UUID, not an integer. Clients connect over the HTTP API or MCP: there is no binary wire protocol.
 
 The full reference still lives in the engine repository, in [`docs/query-language.md`](https://github.com/grafenodb/grafeno/blob/main/docs/query-language.md), until it moves to this site.
 
@@ -129,7 +129,7 @@ With neither a token nor accounts, anyone who can reach the port gets in. The fi
 
 ### Cluster
 
-Several `grafeno` processes stay in sync with Raft, inside the binary itself: etcd or ZooKeeper is not required. There is leader election, failover, linearizable reads and large reads split across members. Each group replicates whole databases and, at most, places whole namespaces on different groups.
+Several `grafeno` processes stay in sync with Raft, inside the binary itself: no separate coordination service is required. There is leader election, failover, linearizable reads and large reads split across members. Each group replicates whole databases and, at most, places whole namespaces on different groups.
 
 ### Operations
 
@@ -141,7 +141,7 @@ The service listens on `127.0.0.1:7810` by default. Persistent settings are in `
 
 | Form | Entry | When |
 | --- | --- | --- |
-| Rust library | Crates `grafeno` and `grafeno-memory` | In the same process, the way SQLite embeds. |
+| Rust library | Crates `grafeno` and `grafeno-memory` | In the same process, as an embedded database. |
 | HTTP server | `grafeno serve` | Applications and Studio. JSON under `/v1/{namespace}/…`. |
 | MCP | `grafeno mcp` | Agents. JSON-RPC over standard input. |
 | Console | `grafeno shell` | GQ queries and administration, on a file or against a server. |
@@ -202,7 +202,7 @@ The workspace version is 0.1.0. Workspace Rust: edition 2024, rust-version 1.88.
 
 - It does not compute embeddings. The client sends them.
 - It is not a distributed store that splits one namespace into pieces.
-- It does not speak Bolt, and it does not aim to cover all of Cypher or GQL.
+- It has no binary wire protocol, and GQ grows with what is needed rather than covering every query form there is.
 - It has no built-in interface. Studio is a separate client.
 - It does not choose the language model. Extraction stays outside the core.
 
@@ -211,5 +211,7 @@ The workspace version is 0.1.0. Workspace Rust: edition 2024, rust-version 1.88.
 This site, `grafeno-docs`, is the product documentation, apart from the engine repository and the Studio repository. This introduction is the first page. The site is in English, and Spanish is available from the language menu.
 
 Continue with [Install Grafeno](./get-started/install.md) and [Your first graph](./get-started/first-graph.md), or choose an integration through the [HTTP API](./guides/http-api.md), [MCP](./guides/mcp.md), or the [TypeScript client](./clients/typescript.md).
+
+To learn the query language one feature at a time, follow the [GQ tutorial](./gq/index.md): every page shows a statement and the answer the engine gives. [Vectors](./vectors/index.md) covers embeddings, vector indexes and how to size them, and [Graph algorithms](./algorithms/index.md) has a worked example for each of the 40 algorithms.
 
 Grafeno is developed in the [grafenodb organization](https://github.com/grafenodb). The symbol is three carbon rings from a graphene lattice.

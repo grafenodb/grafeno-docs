@@ -10,7 +10,7 @@ En quince minutos vas a armar un grafo pequeño de personas y las empresas donde
 
 ## 1. Abre la consola
 
-`grafeno shell` es la consola de Grafeno, como `psql` para PostgreSQL. Conéctala al motor que instalaste, con el archivo de configuración (tiene la dirección y el token):
+`grafeno shell` es la consola de Grafeno. Conéctala al motor que instalaste, con el archivo de configuración (tiene la dirección y el token):
 
 ```bash
 sudo grafeno shell --config /etc/grafeno/grafeno.toml
@@ -42,9 +42,9 @@ Created namespace "demo"; now on it.
 
 ## 3. Crea nodos
 
-Los nodos son las cosas: personas, empresas, notas. Cada uno tiene al menos una **etiqueta** (`Person`, `Company`) y **propiedades**. El lenguaje de consultas de Grafeno es **GQ**, parecido a Cypher:
+Los nodos son las cosas: personas, empresas, notas. Cada uno tiene al menos una **etiqueta** (`Person`, `Company`) y **propiedades**. El lenguaje de consultas de Grafeno es **GQ**, un lenguaje declarativo de patrones de grafos:
 
-```cypher
+```text
 CREATE (ana:Person {name: 'Ana Torres', role: 'engineer'}),
        (bob:Person {name: 'Bob Rivera', role: 'designer'}),
        (acme:Company {name: 'Acme Robotics', city: 'Lima'}),
@@ -59,7 +59,7 @@ CREATE (ana:Person {name: 'Ana Torres', role: 'engineer'}),
 
 Las relaciones entre nodos son **hechos**. Un hecho puede decir desde cuándo es cierto (`@valid_from`) y hasta cuándo (`@valid_to`). Ana entró a Acme en marzo de 2021, Bob en junio de 2022, y Ana conoce a Bob:
 
-```cypher
+```text
 MATCH (ana:Person {name: 'Ana Torres'}), (acme:Company {name: 'Acme Robotics'})
 CREATE (ana)-[:works_at {@valid_from: '2021-03-01'}]->(acme);
 
@@ -74,7 +74,7 @@ CREATE (ana)-[:knows {since: 2022}]->(bob);
 
 `MATCH` describe una forma a encontrar; `RETURN` dice qué mostrar:
 
-```cypher
+```text
 MATCH (p:Person)-[w:works_at]->(c:Company)
 RETURN p.name, c.name, date(w.@valid_from) AS since
 ORDER BY since;
@@ -90,7 +90,7 @@ ORDER BY since;
 
 Los patrones pueden dar varios pasos. ¿Dónde trabajan las personas que Ana conoce?
 
-```cypher
+```text
 MATCH (:Person {name: 'Ana Torres'})-[:knows]->(friend)-[:works_at]->(c)
 RETURN friend.name, c.name;
 ```
@@ -106,7 +106,7 @@ RETURN friend.name, c.name;
 
 Ana deja Acme a fines de enero de 2025 y entra a Orbit Labs. En vez de borrar el hecho viejo, termínalo, y registra el nuevo:
 
-```cypher
+```text
 MATCH (:Person {name: 'Ana Torres'})-[w:works_at]->(:Company {name: 'Acme Robotics'})
 SET w.@valid_to = '2025-01-31';
 
@@ -116,7 +116,7 @@ CREATE (ana)-[:works_at {@valid_from: '2025-02-01'}]->(orbit);
 
 Los dos hechos siguen ahí, cada uno con su período:
 
-```cypher
+```text
 MATCH (:Person {name: 'Ana Torres'})-[w:works_at]->(c)
 RETURN c.name, date(w.@valid_from) AS since, date(w.@valid_to) AS until
 ORDER BY since;
@@ -138,7 +138,7 @@ Una persona trabaja en una empresa a la vez. Decláralo una vez y un trabajo nue
 
 `VALID AT` pregunta qué era cierto en un momento. ¿Dónde trabajaba Ana a mediados de 2023, y dónde trabaja ahora?
 
-```cypher
+```text
 MATCH (:Person {name: 'Ana Torres'})-[:works_at]->(c) VALID AT '2023-06-01' RETURN c.name;
 ```
 
@@ -149,7 +149,7 @@ MATCH (:Person {name: 'Ana Torres'})-[:works_at]->(c) VALID AT '2023-06-01' RETU
 (1 row)
 ```
 
-```cypher
+```text
 MATCH (:Person {name: 'Ana Torres'})-[:works_at]->(c) VALID AT datetime() RETURN c.name;
 ```
 
@@ -166,14 +166,14 @@ Grafeno guarda además un segundo tiempo: cuándo *supo* cada hecho. Ese respond
 
 Un nodo puede llevar un texto (`@text`), que Grafeno indexa para la búsqueda de texto completo:
 
-```cypher
+```text
 CREATE (:Note {title: 'Robot arm review',
                @text: 'Ana and Bob reviewed the new robot arm design for Acme. The gripper needs a softer grip for fragile parts.'});
 CREATE (:Note {title: 'Hiring plan',
                @text: 'Orbit Labs is hiring two engineers to work on satellite telemetry.'});
 ```
 
-```cypher
+```text
 CALL db.search('telemetry', 5) YIELD node, score RETURN node.title, score;
 ```
 
@@ -196,7 +196,7 @@ Ana and Bob reviewed the new robot arm design for Acme. The gripper needs a soft
 
 ## 9. Mira alrededor
 
-```cypher
+```text
 CALL db.labels();
 ```
 
