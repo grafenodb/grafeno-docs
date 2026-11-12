@@ -74,6 +74,18 @@ Each result says why it was found, in `signals`:
 
 Send `embedding` with the question's vector too, and recall uses meaning as well as words. In the console: `\recall who leads robotics?`.
 
+### Following the graph
+
+From the best few matches (`seeds`, 5), recall follows facts `depth` hops (1) and passes each node reached a share of the seed's score: half per hop (`decay`), and less through nodes with many edges. A node linked to almost everything (the user, the current project, a common tag) would otherwise collect score from every match and show up in every answer; recall divides the share along an edge by `sqrt((1 + hubs × ln d₁)(1 + hubs × ln d₂))`, where d₁ and d₂ are the edges of its two ends, and follows at most `fanout` neighbors (100) from each node, those the search found first. All of them go in `expand`:
+
+```bash
+curl -X POST http://127.0.0.1:7810/v1/demo/recall \
+  -H "Authorization: Bearer $TOKEN" -H 'content-type: application/json' \
+  -d '{"text": "what did the platform team decide?", "expand": {"depth": 3, "hubs": 1, "fanout": 100}}'
+```
+
+`"expand": false` turns it off; `"hubs": 0` and `"fanout": 0` give the undamped expansion of earlier engines. The engine's repository has an example where the answer only comes back through the graph — a decision three hops from the person asked about, whose text names neither the person nor the team — with what text search alone finds and what undamped hubs do to it: `cargo run -p grafeno-memory --example multi_hop`.
+
 ## Context
 
 Context is what you hand the model: the recalled texts plus the facts around them, written as plain sentences, cut to a token budget.
@@ -87,11 +99,11 @@ curl -X POST http://127.0.0.1:7810/v1/demo/context \
 ```json
 {"items": [{"name": "Ana Torres", "labels": ["Person"], "text": "Ana leads the robotics team at Acme.", "…": "…"}],
  "facts": [{"label": "works_at", "text": "Ana Torres works_at Acme Robotics (from 2021-03-01)", "…": "…"}],
- "tokens": 41,
+ "tokens": 66,
  "rendered": "## Memory\n[1] Ana Torres (Person)\nAna leads the robotics team at Acme.\n…"}
 ```
 
-`rendered` is ready to paste into a prompt; `items` and `facts` keep the ids, so the model's answer can cite them. Options: `fact_share` (how much of the budget goes to facts), `max_facts`, and `communities` to add summaries of the [communities](../guides/agent-memory.md#summaries-of-what-belongs-together) that match.
+Without a tokenizer the engine counts tokens on the safe side: a token per four ASCII letters, three digits, or any other character (punctuation, symbols, accented letters, other scripts), so code, data and text outside English do not overflow the budget. `rendered` is ready to paste into a prompt; `items` and `facts` keep the ids, so the model's answer can cite them. Options: `fact_share` (how much of the budget goes to facts), `max_facts`, and `communities` to add summaries of the [communities](../guides/agent-memory.md#summaries-of-what-belongs-together) that match.
 
 ## Through MCP
 

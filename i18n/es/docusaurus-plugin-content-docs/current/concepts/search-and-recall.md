@@ -74,6 +74,18 @@ Cada resultado dice por qué se encontró, en `signals`:
 
 Envía también `embedding` con el vector de la pregunta, y el recall usa significado además de palabras. En la consola: `\recall who leads robotics?`.
 
+### Seguir el grafo
+
+Desde las mejores coincidencias (`seeds`, 5), el recall sigue los hechos `depth` saltos (1) y le pasa a cada nodo alcanzado una parte del puntaje de la semilla: la mitad por salto (`decay`), y menos a través de nodos con muchas aristas. Un nodo conectado con casi todo (el usuario, el proyecto actual, una etiqueta común) sumaría puntaje de cada coincidencia y aparecería en todas las respuestas; el recall divide la parte que pasa por una arista entre `sqrt((1 + hubs × ln d₁)(1 + hubs × ln d₂))`, donde d₁ y d₂ son las aristas de sus dos extremos, y sigue como máximo `fanout` vecinos (100) desde cada nodo, primero los que encontró la búsqueda. Todo va en `expand`:
+
+```bash
+curl -X POST http://127.0.0.1:7810/v1/demo/recall \
+  -H "Authorization: Bearer $TOKEN" -H 'content-type: application/json' \
+  -d '{"text": "what did the platform team decide?", "expand": {"depth": 3, "hubs": 1, "fanout": 100}}'
+```
+
+`"expand": false` lo desactiva; `"hubs": 0` y `"fanout": 0` dan la expansión sin atenuar de los motores anteriores. El repositorio del motor tiene un ejemplo en el que la respuesta solo vuelve a través del grafo (una decisión a tres saltos de la persona por la que se pregunta, cuyo texto no nombra ni a la persona ni al equipo), con lo que encuentra la búsqueda de texto sola y lo que le hacen los hubs sin atenuar: `cargo run -p grafeno-memory --example multi_hop`.
+
 ## Contexto {#context}
 
 El contexto es lo que le das al modelo: los textos recuperados más los hechos que los rodean, escritos como oraciones simples, recortados a un presupuesto de tokens.
@@ -87,11 +99,11 @@ curl -X POST http://127.0.0.1:7810/v1/demo/context \
 ```json
 {"items": [{"name": "Ana Torres", "labels": ["Person"], "text": "Ana leads the robotics team at Acme.", "…": "…"}],
  "facts": [{"label": "works_at", "text": "Ana Torres works_at Acme Robotics (from 2021-03-01)", "…": "…"}],
- "tokens": 41,
+ "tokens": 66,
  "rendered": "## Memory\n[1] Ana Torres (Person)\nAna leads the robotics team at Acme.\n…"}
 ```
 
-`rendered` está listo para pegar en un prompt; `items` y `facts` conservan los ids, así la respuesta del modelo puede citarlos. Opciones: `fact_share` (qué parte del presupuesto va a hechos), `max_facts` y `communities` para agregar resúmenes de las [comunidades](../guides/agent-memory.md#summaries-of-what-belongs-together) que coincidan.
+Sin un tokenizador, el motor cuenta los tokens del lado seguro: un token por cada cuatro letras ASCII, tres dígitos, o cualquier otro carácter (puntuación, símbolos, letras con tilde, otras escrituras), así el código, los datos y el texto que no está en inglés no se pasan del presupuesto. `rendered` está listo para pegar en un prompt; `items` y `facts` conservan los ids, así la respuesta del modelo puede citarlos. Opciones: `fact_share` (qué parte del presupuesto va a hechos), `max_facts` y `communities` para agregar resúmenes de las [comunidades](../guides/agent-memory.md#summaries-of-what-belongs-together) que coincidan.
 
 ## Por MCP
 
