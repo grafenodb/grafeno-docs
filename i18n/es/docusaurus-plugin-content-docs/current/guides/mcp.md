@@ -268,10 +268,13 @@ Antes de responder sobre terreno incierto, un agente puede preguntar qué sabe. 
 
 - **known**: los recuerdos y hechos encontrados, contados por tipo y por cómo se saben, con los verificados nombrados;
 - **uncertain**: lo inferido sin fuente, o con certeza baja;
+- **unsupported**: lo que se dijo afirmado u observado sin ninguna fuente detrás;
 - **conflicts**: los choques registrados bajo restricciones o con `contradicts`, primero los no resueltos, cada uno un cambio (`change`: el hecho nuevo ocupó el lugar del anterior) o una contradicción (`contradiction`: ambos siguen en pie);
 - **stale**: hechos que terminaron, recuerdos archivados u obsoletos, recuerdos sin usar hace mucho, antiguos que uno más nuevo puede haber superado;
-- **gaps**: preguntas abiertas, cosas mencionadas y nunca descritas, lugares vacíos, pasos pendientes de un checkpoint;
+- **gaps**: preguntas abiertas, cosas mencionadas y nunca descritas, lugares vacíos, pasos pendientes de un checkpoint, y lo que la forma esperada de un tipo pide y a un recuerdo le falta;
 - **next**: qué comprobar, con la llamada que lo hace.
+
+Las fuentes de cada elemento están en `sources`, por su id, y `known.by_evidence` cuenta cada registro una vez según lo que hay guardado detrás (en conflicto, obsoleto, verificado, respaldado, o sin fuente): recuentos, no probabilidades. Lo que un tipo de recuerdo debería tener es su forma esperada: `"expected": {"Decision": {"relations": ["supported_by"], "properties": ["reason"]}}` en la llamada, o declarada una vez como un recuerdo con la etiqueta `Shape` y las propiedades `kind`, `relations` y `properties`. La reflexión recomienda comprobaciones y nunca busca fuera de Grafeno.
 
 Un tema sin nada guardado responde `"nothing": true`, sin ofrecer un recuerdo sin relación en su lugar. Una pregunta es un recuerdo con la etiqueta `Question`, abierta hasta que un recuerdo se relaciona con ella con `answers`. La reflexión no escribe ni juzga nada: el origen y la certeza son lo que dijeron los agentes.
 

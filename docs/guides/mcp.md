@@ -268,10 +268,13 @@ Before answering on uncertain ground, an agent can ask what it knows. `palace_re
 
 - **known**: the memories and facts found, counted by kind and by how they are known, the verified ones named;
 - **uncertain**: what was inferred with no source, or has a low certainty;
+- **unsupported**: what was said to be stated or observed with no source behind it;
 - **conflicts**: clashes recorded under constraints or with `contradicts`, the unsettled first, each a `change` (the newer fact took the older's place) or a `contradiction` (both stand);
 - **stale**: facts that ended, archived or obsolete memories, memories long unused, older ones a newer memory may overtake;
-- **gaps**: open questions, things mentioned and never described, empty places, steps left in a checkpoint;
+- **gaps**: open questions, things mentioned and never described, empty places, steps left in a checkpoint, and what a kind's expected shape asks for and a memory lacks;
 - **next**: what to check, with the call that does it.
+
+Each item's sources are under `sources`, by its id, and `known.by_evidence` counts every record once by what is stored behind it (conflicting, obsolete, verified, supported, or with no source): counts, not probabilities. What a kind of memory should have is its expected shape: `"expected": {"Decision": {"relations": ["supported_by"], "properties": ["reason"]}}` in the call, or declared once as a memory labeled `Shape` with the properties `kind`, `relations` and `properties`. The reflection recommends checks and never searches outside Grafeno.
 
 A topic with nothing stored answers `"nothing": true`, and no unrelated memory in its place. A question is a memory labeled `Question`, open until a memory is related to it with `answers`. The reflection writes nothing and judges nothing: origin and certainty are what agents stated.
 
