@@ -104,6 +104,20 @@ Measured on 20 000 vectors of 128 dimensions in 64 clusters:
 
 recall@10 is the share of the true 10 nearest that a search finds. It stays at 0.99 or more at `ef` 64 as vectors are deleted, inserted back and moved. A search can raise `ef` for itself: `db.searchVector(v, {index: 'docs', ef: 200})`. `grafeno check --recall 100` estimates the recall of your own index.
 
+## Wear: removals and compaction
+
+Removing or replacing a vector repairs its neighbors' links instead of choosing them afresh. After many removals — deduplication, merges, forgetting, consolidation — a handful of vectors can end up with no link pointing at them, and no search reaches them. Each vector graph (a namespace's own, and each vector index) counts its removals since it was built:
+
+```bash
+curl http://127.0.0.1:7810/v1/demo/vectors/health -H "Authorization: Bearer $TOKEN"
+```
+
+```json
+[{"index": null, "dimension": 128, "vectors": 20000, "removed": 38000, "repaired": 1711815, "churn": 1.9, "building": false}]
+```
+
+The server compacts — builds again — a graph once `churn` (removals over vectors) reaches `compact_vectors_at` (0.5) in `[background]`, for graphs of 1 000 to 50 000 vectors. A compaction holds the writer about as long as inserting every vector again (about 6 s for 20 000 of 128 dimensions); searches use the old graph until it commits. Larger graphs are left to you, at a quiet time: `grafeno compact -n NS` (each vector index too) or `POST /v1/{ns}/compact?index=docs`. Measured on the graph above after five rounds of churn: recall@10 at `ef` 64 went from 0.995 to 1.000 and the vectors no search reached from 8 to 0.
+
 ## Events with vectors
 
 An [event subscription](../gq/events.md) `WITH VECTORS` copies each new vector into the change log. Measured with 384-dimension vectors: the log grew from 5.7 MiB to 190 MiB for the same writes. Keep the change log's window small (`[changes] max_entries`, `max_age_days`) when you use it.

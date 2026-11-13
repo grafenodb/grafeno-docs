@@ -38,7 +38,7 @@ The commands below inspect and repair the data. Commands that use `--db` open th
 | `grafeno stats --db F [-n NS]` | Print statistics as JSON. |
 | `grafeno check --db F [-n NS]` | Verify checksums, records, indexes, and counters. |
 | `grafeno check --db F --recall 100` | Also estimate vector-search recall@10. |
-| `grafeno compact --db F -n NS` | Rebuild a namespace's vector graph. |
+| `grafeno compact --db F -n NS` | Rebuild a namespace's vector graph and each of its vector indexes. The server also does it on its own for a graph worn past `compact_vectors_at`. |
 | `grafeno rebuild --db F -n NS` | Rebuild indexes and counters from records. |
 | `grafeno extract --db F -n NS` | Link mentions in new and changed text. |
 | `grafeno export --db F -o data.jsonl` | Export JSON Lines. |
@@ -61,7 +61,7 @@ To back up a running server without stopping it, target its URL or configuration
 1. Create a backup.
 2. Run `check` and preserve its output.
 3. Use `rebuild` only when the report identifies inconsistent indexes or counters.
-4. Use `compact` when vector recall or reachability is the problem.
+4. Use `compact` when vector recall or reachability is the problem, or `check` reports many removals since a graph was built.
 5. Run `check` again.
 
 `rebuild` and `compact` repair derived structures; they are not substitutes for a backup.

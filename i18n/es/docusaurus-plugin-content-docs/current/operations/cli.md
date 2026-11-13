@@ -38,7 +38,7 @@ Los comandos de abajo inspeccionan y reparan los datos. Los comandos con `--db` 
 | `grafeno stats --db F [-n NS]` | Imprimir estadísticas como JSON. |
 | `grafeno check --db F [-n NS]` | Verificar checksums, registros, índices y contadores. |
 | `grafeno check --db F --recall 100` | También estimar recall@10 de búsqueda vectorial. |
-| `grafeno compact --db F -n NS` | Reconstruir el grafo vectorial de un namespace. |
+| `grafeno compact --db F -n NS` | Reconstruir el grafo vectorial de un namespace y el de cada uno de sus índices vectoriales. El servidor también lo hace por su cuenta con un grafo desgastado más allá de `compact_vectors_at`. |
 | `grafeno rebuild --db F -n NS` | Reconstruir índices y contadores desde los registros. |
 | `grafeno extract --db F -n NS` | Enlazar menciones de textos nuevos o modificados. |
 | `grafeno export --db F -o datos.jsonl` | Exportar JSON Lines. |
@@ -61,7 +61,7 @@ Para respaldar un servidor en marcha sin detenerlo, apunta a su URL o configurac
 1. Crea un respaldo.
 2. Ejecuta `check` y conserva su salida.
 3. Usa `rebuild` solo si el reporte identifica índices o contadores inconsistentes.
-4. Usa `compact` si el problema es el recall o la alcanzabilidad de vectores.
+4. Usa `compact` si el problema es el recall o la alcanzabilidad de vectores, o si `check` informa de muchas eliminaciones desde que se construyó un grafo.
 5. Vuelve a ejecutar `check`.
 
 `rebuild` y `compact` reparan estructuras derivadas; no sustituyen un respaldo.

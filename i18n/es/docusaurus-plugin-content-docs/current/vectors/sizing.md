@@ -104,6 +104,20 @@ Medido con 20 000 vectores de 128 dimensiones en 64 grupos:
 
 recall@10 es la parte de los 10 vecinos verdaderamente más cercanos que encuentra una búsqueda. Se mantiene en 0,99 o más con `ef` 64 cuando se borran vectores, se vuelven a insertar y se mueven. Una búsqueda puede subir su propio `ef`: `db.searchVector(v, {index: 'docs', ef: 200})`. `grafeno check --recall 100` estima el recall de tu propio índice.
 
+## Desgaste: eliminaciones y compactación
+
+Eliminar o reemplazar un vector repara los enlaces de sus vecinos en lugar de elegirlos de nuevo. Tras muchas eliminaciones —deduplicación, fusiones, olvido, consolidación— algunos vectores pueden quedar sin ningún enlace que apunte a ellos, y ninguna búsqueda los alcanza. Cada grafo vectorial (el del propio namespace y el de cada índice vectorial) cuenta sus eliminaciones desde que se construyó:
+
+```bash
+curl http://127.0.0.1:7810/v1/demo/vectors/health -H "Authorization: Bearer $TOKEN"
+```
+
+```json
+[{"index": null, "dimension": 128, "vectors": 20000, "removed": 38000, "repaired": 1711815, "churn": 1.9, "building": false}]
+```
+
+El servidor compacta (vuelve a construir) un grafo cuando `churn` (eliminaciones sobre vectores) llega a `compact_vectors_at` (0,5) en `[background]`, para grafos de 1 000 a 50 000 vectores. Una compactación retiene al escritor más o menos lo que tardaría insertar de nuevo cada vector (unos 6 s para 20 000 de 128 dimensiones); las búsquedas usan el grafo anterior hasta que confirma. Los grafos más grandes quedan a tu cargo, en un momento tranquilo: `grafeno compact -n NS` (también cada índice vectorial) o `POST /v1/{ns}/compact?index=docs`. Medido en el grafo de arriba tras cinco rondas de cambios: el recall@10 con `ef` 64 pasó de 0,995 a 1,000 y los vectores que ninguna búsqueda alcanzaba, de 8 a 0.
+
 ## Eventos con vectores
 
 Una [suscripción a eventos](../gq/events.md) `WITH VECTORS` copia cada vector nuevo al registro de cambios. Medido con vectores de 384 dimensiones: el registro pasó de 5,7 MiB a 190 MiB para las mismas escrituras. Mantén chica la ventana del registro de cambios (`[changes] max_entries`, `max_age_days`) cuando la uses.
