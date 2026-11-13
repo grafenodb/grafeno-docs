@@ -237,6 +237,14 @@ Los recuerdos se guardan como siempre, con `remember` y `relate`, y después se 
 
 Un recorrido devuelve solo lo que está en un palacio o se alcanza desde él; un recuerdo que coincide con el tema y no está anclado le toca a `recall`.
 
+Tres cosas más que hace un recorrido:
+
+- **Puertas.** Un hecho `leads_to` de una sala a otra, registrado con `relate`, es una puerta. `palace_map` lista las puertas de una sala, y un recorrido atraviesa las puertas de las salas que encontró: lo anclado al otro lado queda a un paso, con la puerta en su `via`.
+- **Relevancia.** `"order": "relevance"` ordena lo alcanzado por cuánto coinciden sus palabras con el tema (palabras enteras) y después por distancia. Cada recuerdo dice su `relevance`.
+- **Un contexto.** `"budget": 600` devuelve además los recuerdos alcanzados y los hechos que los unen como texto dentro de ese número de tokens. Una pregunta que necesita unir varios recuerdos, como quién mantiene el servicio al que afectó una caída, se responde con ese texto, con el camino que los unió en el `via` de cada recuerdo.
+
+`context`, `palace_enter` y el contexto de un recorrido dejan fuera un recuerdo cuyas palabras son casi las de otro ya incluido, y dicen cuántos dejaron fuera.
+
 `palace_enter` reconstruye el contexto de una sala al empezar una sesión: sus recuerdos, los más fuertes primero, y los hechos que los conectan, como texto dentro de un presupuesto de tokens (`budget`, 1.500 por defecto), y el último checkpoint sobre la sala. Ese checkpoint se guarda con la herramienta `checkpoint`, con `about` igual al id de la sala.
 
 ```json

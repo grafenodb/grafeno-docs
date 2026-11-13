@@ -237,6 +237,14 @@ Memories are stored as always, with `remember` and `relate`, and then anchored. 
 
 A walk returns only what is in a palace or reached from it; a memory that matches the topic and is anchored nowhere is `recall`'s to find.
 
+Three more things a walk does:
+
+- **Doors.** A `leads_to` fact from one room to another, recorded with `relate`, is a door. `palace_map` lists a room's doors, and a walk goes through the doors of the rooms it found: what is anchored beyond is one step away, with the door in its `via`.
+- **Relevance.** `"order": "relevance"` ranks what the walk reached by how well its words match the topic (whole words), then by distance. Each memory says its `relevance`.
+- **A context.** `"budget": 600` also returns the memories reached and the facts that join them as text within that many tokens. A question that needs several memories joined, such as who maintains the service an outage hit, is answered by that text, with the way that joined them in each memory's `via`.
+
+`context`, `palace_enter` and a walk's context leave out a memory whose words are nearly those of one already packed, and say how many they left out.
+
 `palace_enter` rebuilds a room's context at the start of a session: its memories, the strongest first, and the facts that connect them, as text within a token `budget` (1,500 by default), and the latest checkpoint about the room. Saving that checkpoint is the `checkpoint` tool, with `about` set to the room's id.
 
 ```json
