@@ -34,7 +34,7 @@ El servidor le explica al agente cómo usarlo al conectarse: llamar a `context` 
 | Encontrar y leer | `recall` (palabras, significado y grafo, cada resultado con el porqué), `context` (recuerdos y hechos como texto dentro de un presupuesto de tokens), `get_node`, `query` ([GQ](../gq/index.md) de solo lectura, 200 filas como máximo), `overview` (resúmenes de comunidades para preguntas amplias) |
 | Guardar textos largos | `ingest` (un documento, una conversación o código, cortado en fragmentos) |
 | Retomar el trabajo | `checkpoint` (en qué quedó una tarea), `resume` (su último checkpoint y lo que cambió desde entonces) |
-| Ordenar los recuerdos en lugares | `palace_create`, `palace_create_room`, `palace_anchor` (un recuerdo que ya existe en un lugar de una sala), `palace_map`, `palace_walk` (de un tema a los recuerdos que lo rodean), `palace_enter` (el contexto de una sala y su checkpoint) |
+| Ordenar los recuerdos en lugares | `palace_create`, `palace_create_room`, `palace_anchor` (un recuerdo que ya existe en un lugar de una sala), `palace_map`, `palace_walk` (de un tema a los recuerdos que lo rodean), `palace_enter` (el contexto de una sala y su checkpoint), `palace_review` (propuestas para ordenarlo mejor) |
 | Seguir los hechos en el tiempo | `timeline` (cómo cambió un nodo), `contradictions` (hechos que chocaron bajo una restricción), `changes` (lo escrito desde un número de secuencia) |
 | Mantener la memoria en forma | `maintain` (salud, posibles duplicados, recuerdos que se desvanecen, grupos para resumir), `feedback` (útil, obsoleto, incorrecto), `merge`, `undo_merge`, `consolidate`, `find_matches` |
 | Enlazar lo que mencionan los textos | `extract`, `add_mentions`, `review`, `resolve_review` |
@@ -245,6 +245,13 @@ Tres cosas más que hace un recorrido:
 
 `context`, `palace_enter` y el contexto de un recorrido dejan fuera un recuerdo cuyas palabras son casi las de otro ya incluido, y dicen cuántos dejaron fuera.
 
+Un palacio cambia con el trabajo:
+
+- `palace_review` propone cómo ordenarlo mejor, cada propuesta con su motivo y la llamada que la aplica, y no aplica nada: dividir una sala demasiado llena para un contexto, fusionar dos salas que guardan los mismos recuerdos, mover un recuerdo a la sala donde vive su comunidad, quitar salas y loci vacíos, crear una sala para una comunidad de recuerdos que no tiene ninguna. Lo que depende de comunidades necesita antes `summarize_communities`.
+- `forget` sobre un palacio, una sala o un locus lo borra con lo que hay debajo (salas, loci, anclas), y nunca un recuerdo. `"dry_run": true` dice antes qué se iría.
+- `maintain` lista recuerdos antiguos que uno más nuevo sobre la misma entidad puede haber superado, para que el agente lo juzgue; `feedback` `obsolete` archiva el antiguo.
+- `consolidate` con `"undo"` y el id de un resumen borra el resumen y recupera los recuerdos que había archivado.
+
 `palace_enter` reconstruye el contexto de una sala al empezar una sesión: sus recuerdos, los más fuertes primero, y los hechos que los conectan, como texto dentro de un presupuesto de tokens (`budget`, 1.500 por defecto), y el último checkpoint sobre la sala. Ese checkpoint se guarda con la herramienta `checkpoint`, con `about` igual al id de la sala.
 
 ```json
@@ -363,7 +370,17 @@ grafeno mcp --db agente.redb --namespace yo \
 | `--as NAME` | Guarda `NAME` en `@recorded_by` para las escrituras del agente, y como agente de sus checkpoints. |
 | `--own-only` | Con `--as`, solo permite cambiar registros escritos por ese actor. |
 
-Varios agentes que comparten una memoria, cada uno con sus permisos, usan en cambio la API HTTP con [cuentas y roles](access.md): un servidor, un archivo y una clave por agente.
+## Varios agentes, una memoria
+
+Varios agentes comparten una memoria a través de un servidor dueño del archivo. Da a cada agente una cuenta propia con [cuentas y roles](access.md) y una clave, y haz que su proceso MCP ejecute sus herramientas en el servidor en vez de abrir un archivo:
+
+```bash
+grafeno mcp --url http://127.0.0.1:7810 --token "$CLAVE_DEL_AGENTE" --namespace equipo
+```
+
+El servidor comprueba los derechos de cada agente por su clave: un agente que solo puede leer un namespace recibe las herramientas que leen allí y se le rechazan las demás; uno sin derechos sobre un namespace es rechazado allí. Un palacio en un namespace que solo una cuenta puede usar es de ese agente; un palacio en un namespace que varios pueden leer es compartido. Cada escritura queda registrada con la cuenta del agente, los rechazos van al registro de auditoría, y el servidor hace pasar las escrituras de todos los agentes por su único escritor, así que pueden trabajar a la vez.
+
+Las mismas herramientas funcionan por HTTP: `GET /v1/{ns}/tools` lista las que puede usar quien llama, y `POST /v1/{ns}/tools/{name}` ejecuta una con un objeto JSON de argumentos y responde como MCP. GQ va por `POST /v1/{ns}/query`. Las herramientas comprueban derechos por namespace: una cuenta con reglas sobre etiquetas, propiedades o registros usa las otras rutas de la API. Todavía no están disponibles en un clúster.
 
 ## Ver la memoria del agente mientras escribe
 

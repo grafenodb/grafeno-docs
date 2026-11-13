@@ -34,7 +34,7 @@ The server tells the agent how to use it when it connects: call `context` (or `r
 | Find and read | `recall` (words, meaning and the graph, each result with why it matched), `context` (memories and facts as text within a token budget), `get_node`, `query` (read-only [GQ](../gq/index.md), 200 rows at most), `overview` (community summaries for broad questions) |
 | Store long texts | `ingest` (a document, a conversation or code, cut into chunks) |
 | Pick work up again | `checkpoint` (where a task stands), `resume` (its latest checkpoint and what changed since) |
-| Arrange memories into places | `palace_create`, `palace_create_room`, `palace_anchor` (an existing memory at a place in a room), `palace_map`, `palace_walk` (from a topic to the memories around it), `palace_enter` (a room's context and its checkpoint) |
+| Arrange memories into places | `palace_create`, `palace_create_room`, `palace_anchor` (an existing memory at a place in a room), `palace_map`, `palace_walk` (from a topic to the memories around it), `palace_enter` (a room's context and its checkpoint), `palace_review` (proposals to arrange it better) |
 | Follow facts over time | `timeline` (how a node changed), `contradictions` (facts that clashed under a constraint), `changes` (what was written since a sequence number) |
 | Keep memory in shape | `maintain` (health, likely duplicates, fading memories, groups to summarize), `feedback` (useful, obsolete, wrong), `merge`, `undo_merge`, `consolidate`, `find_matches` |
 | Link what texts mention | `extract`, `add_mentions`, `review`, `resolve_review` |
@@ -245,6 +245,13 @@ Three more things a walk does:
 
 `context`, `palace_enter` and a walk's context leave out a memory whose words are nearly those of one already packed, and say how many they left out.
 
+A palace changes as the work does:
+
+- `palace_review` proposes how to arrange it better, each proposal with its reason and the call that carries it out, and applies nothing: split a room too full for one context, merge two rooms that hold the same memories, move a memory to the room where its community lives, remove empty rooms and loci, make a room for a community of memories with none. What depends on communities needs `summarize_communities` first.
+- `forget` on a palace, a room or a locus deletes it with what is under it (rooms, loci, anchors), and never a memory. `"dry_run": true` says what would go first.
+- `maintain` lists older memories that a newer one about the same entity may overtake, for the agent to judge; `feedback` `obsolete` archives the older one.
+- `consolidate` with `"undo"` and a summary's id deletes the summary and brings back the memories it archived.
+
 `palace_enter` rebuilds a room's context at the start of a session: its memories, the strongest first, and the facts that connect them, as text within a token `budget` (1,500 by default), and the latest checkpoint about the room. Saving that checkpoint is the `checkpoint` tool, with `about` set to the room's id.
 
 ```json
@@ -363,7 +370,17 @@ grafeno mcp --db agent.redb --namespace me \
 | `--as NAME` | Save `NAME` in `@recorded_by` for the agent's writes, and as the agent of its checkpoints. |
 | `--own-only` | With `--as`, only allow changes to records written by that actor. |
 
-Several agents sharing one memory, each with its own permissions, use the HTTP API with [accounts and roles](access.md) instead: one server, one file, and a key per agent.
+## Several agents, one memory
+
+Several agents share one memory through one server that owns the file. Give each agent an account of its own with [accounts and roles](access.md) and a key, and let its MCP process run its tools on the server instead of opening a file:
+
+```bash
+grafeno mcp --url http://127.0.0.1:7810 --token "$AGENT_KEY" --namespace team
+```
+
+The server checks each agent's rights by its key: an agent that may only read a namespace gets the tools that read there and is refused the others; one with no right on a namespace is refused there. A palace in a namespace only one account may use is that agent's own; a palace in a namespace several may read is shared. Each write is recorded as the agent's account, refusals go to the audit log, and the server takes the writes of every agent on its one writer, so they can work at the same time.
+
+The same tools run over HTTP: `GET /v1/{ns}/tools` lists those the caller may use, and `POST /v1/{ns}/tools/{name}` runs one with a JSON object of arguments and answers as MCP does. GQ runs on `POST /v1/{ns}/query`. The tools check rights by namespace: an account with rules on labels, properties or records uses the API's other routes. They are not available on a cluster yet.
 
 ## Watch the agent's memory as it writes
 
