@@ -265,7 +265,7 @@ Before answering on uncertain ground, an agent can ask what it knows. `palace_re
 
 - **known**: the memories and facts found, counted by kind and by how they are known, the verified ones named;
 - **uncertain**: what was inferred with no source, or has a low certainty;
-- **conflicts**: clashes recorded under constraints, the unsettled first;
+- **conflicts**: clashes recorded under constraints or with `contradicts`, the unsettled first, each a `change` (the newer fact took the older's place) or a `contradiction` (both stand);
 - **stale**: facts that ended, archived or obsolete memories, memories long unused, older ones a newer memory may overtake;
 - **gaps**: open questions, things mentioned and never described, empty places, steps left in a checkpoint;
 - **next**: what to check, with the call that does it.
@@ -345,6 +345,19 @@ With a [constraint](../gq/constraints.md) such as one employer per person, recor
 ```
 
 (Some `fact_recorded` moments are left out above.)
+
+`timeline` also answers two questions about time:
+
+- **What changed between two dates.** `"compare": "2023-06-01"` (and `"at"`, now by default) lists the node's facts that **ended**, that **began**, and that **changed**: the same relation from the same end to another node. For Ana Torres, `works_at` changed from Acme to Globex; a fact true at both dates is only counted (`kept`).
+- **A decision's history.** A decision that changes is a new memory that `supersedes` the one before, recorded with `relate` and a `reason` (and `sources` for the evidence). `timeline` on any version answers `history`: every version, oldest first, the current one last, each with the reason and evidence of its change. Nothing is deleted; older versions stay readable.
+
+```json
+{"name": "relate", "arguments": {
+  "from": "<the new decision>", "label": "supersedes", "to": "<the old one>",
+  "reason": "one table grew too slow", "sources": ["<the measurement>"]}}
+```
+
+`palace_reflect` tells a **change** (under a constraint, a newer fact took an older one's place, as `works_at` above) from a **contradiction** (both stand: flagged under a constraint, or recorded with `contradicts`). Facts from different sources are not taken for contradictions unless recorded as such.
 
 ## Keeping memory in shape: `feedback` and `maintain`
 

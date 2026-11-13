@@ -265,7 +265,7 @@ Antes de responder sobre terreno incierto, un agente puede preguntar qué sabe. 
 
 - **known**: los recuerdos y hechos encontrados, contados por tipo y por cómo se saben, con los verificados nombrados;
 - **uncertain**: lo inferido sin fuente, o con certeza baja;
-- **conflicts**: los choques registrados bajo restricciones, primero los no resueltos;
+- **conflicts**: los choques registrados bajo restricciones o con `contradicts`, primero los no resueltos, cada uno un cambio (`change`: el hecho nuevo ocupó el lugar del anterior) o una contradicción (`contradiction`: ambos siguen en pie);
 - **stale**: hechos que terminaron, recuerdos archivados u obsoletos, recuerdos sin usar hace mucho, antiguos que uno más nuevo puede haber superado;
 - **gaps**: preguntas abiertas, cosas mencionadas y nunca descritas, lugares vacíos, pasos pendientes de un checkpoint;
 - **next**: qué comprobar, con la llamada que lo hace.
@@ -345,6 +345,19 @@ Con una [restricción](../gq/constraints.md) como un empleador por persona, regi
 ```
 
 (Arriba se omiten algunos momentos `fact_recorded`.)
+
+`timeline` responde además dos preguntas sobre el tiempo:
+
+- **Qué cambió entre dos fechas.** `"compare": "2023-06-01"` (y `"at"`, ahora por defecto) lista los hechos del nodo que **terminaron**, los que **empezaron** y los que **cambiaron**: la misma relación desde el mismo extremo hacia otro nodo. Para Ana Torres, `works_at` cambió de Acme a Globex; un hecho vigente en ambas fechas solo se cuenta (`kept`).
+- **La historia de una decisión.** Una decisión que cambia es un recuerdo nuevo que reemplaza (`supersedes`) al anterior, registrado con `relate` y un `reason` (y `sources` para la evidencia). `timeline` sobre cualquier versión responde `history`: todas las versiones, de la más antigua a la vigente, cada una con el motivo y la evidencia de su cambio. No se borra nada; las versiones anteriores siguen legibles.
+
+```json
+{"name": "relate", "arguments": {
+  "from": "<la nueva decisión>", "label": "supersedes", "to": "<la anterior>",
+  "reason": "una sola tabla se volvió lenta", "sources": ["<la medición>"]}}
+```
+
+`palace_reflect` distingue un **cambio** (bajo una restricción, un hecho nuevo ocupó el lugar de otro anterior, como `works_at` arriba) de una **contradicción** (ambos siguen en pie: marcados bajo una restricción, o registrados con `contradicts`). Hechos de fuentes distintas no se toman por contradicciones salvo que se registren como tales.
 
 ## Mantener la memoria en forma: `feedback` y `maintain`
 
