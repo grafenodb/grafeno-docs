@@ -24,7 +24,7 @@ La configuración de un cliente MCP (dónde está el archivo y cómo se llama de
 }
 ```
 
-El servidor le explica al agente cómo usarlo al conectarse: llamar a `context` (o `recall`) antes de responder algo que pueda depender de lo que sabe, guardar hechos y decisiones nuevas con `remember`, conectar nodos con `relate`, usar `resume` al empezar trabajo en curso y `checkpoint` antes de terminar. Cada herramienta acepta un `namespace` opcional; sin él usa `--namespace`. Los ids son los UUID que devuelven las herramientas.
+El servidor le explica al agente cómo usarlo al conectarse: llamar a `context` (o `recall`) antes de responder algo que pueda depender de lo que sabe, guardar hechos y decisiones nuevas con `remember`, conectar nodos con `relate`, usar `resume` al empezar trabajo en curso y `checkpoint` antes de terminar, y mantener juntos los recuerdos de un proyecto en una sala de un palacio. Cada herramienta acepta un `namespace` opcional; sin él usa `--namespace`. Los ids son los UUID que devuelven las herramientas.
 
 ## Las herramientas
 
@@ -34,6 +34,7 @@ El servidor le explica al agente cómo usarlo al conectarse: llamar a `context` 
 | Encontrar y leer | `recall` (palabras, significado y grafo, cada resultado con el porqué), `context` (recuerdos y hechos como texto dentro de un presupuesto de tokens), `get_node`, `query` ([GQ](../gq/index.md) de solo lectura, 200 filas como máximo), `overview` (resúmenes de comunidades para preguntas amplias) |
 | Guardar textos largos | `ingest` (un documento, una conversación o código, cortado en fragmentos) |
 | Retomar el trabajo | `checkpoint` (en qué quedó una tarea), `resume` (su último checkpoint y lo que cambió desde entonces) |
+| Ordenar los recuerdos en lugares | `palace_create`, `palace_create_room`, `palace_anchor` (un recuerdo que ya existe en un lugar de una sala), `palace_map`, `palace_walk` (de un tema a los recuerdos que lo rodean), `palace_enter` (el contexto de una sala y su checkpoint) |
 | Seguir los hechos en el tiempo | `timeline` (cómo cambió un nodo), `contradictions` (hechos que chocaron bajo una restricción), `changes` (lo escrito desde un número de secuencia) |
 | Mantener la memoria en forma | `maintain` (salud, posibles duplicados, recuerdos que se desvanecen, grupos para resumir), `feedback` (útil, obsoleto, incorrecto), `merge`, `undo_merge`, `consolidate`, `find_matches` |
 | Enlazar lo que mencionan los textos | `extract`, `add_mentions`, `review`, `resolve_review` |
@@ -139,6 +140,131 @@ En la siguiente sesión, este agente u otro la retoma, y se entera de lo que se 
 
 `resume` sin tarea devuelve el último checkpoint de cualquiera; `about` o `agent` lo acotan. Si nada coincide, lista las tareas que tienen checkpoints.
 
+## Los recuerdos por lugar: las herramientas `palace_*`
+
+Un palacio mental ordena en lugares recuerdos que ya existen, para que un agente los vuelva a encontrar por dónde están. Un **palacio** (`Work`) tiene **salas**, una por proyecto o tema; una sala tiene **loci**, lugares dentro de ella (toda sala tiene uno llamado `entrance`); y un recuerdo se **ancla** en uno o varios loci. El recuerdo no se copia ni cambia y conserva sus relaciones: un ancla es una arista más. Un palacio vive en un namespace, y son nodos y aristas normales, así que se guarda con todo lo demás.
+
+Estos ejemplos vienen de otra sesión, con tres notas sobre un motor de almacenamiento.
+
+Un palacio y una sala se crean una vez; pedirlos de nuevo devuelve los que hay. Un palacio o una sala se indican por su nombre o por su id.
+
+```json
+{"name": "palace_create", "arguments": {"name": "Work", "description": "Projects I work on"}}
+{"name": "palace_create_room", "arguments": {
+  "palace": "Work", "name": "Storage", "topic": "the storage engine", "loci": ["Decisions"]}}
+```
+
+```json
+{
+  "created": true,
+  "id": "01a1d4a0-93ba-735b-8a34-93a7400f181d",
+  "palace": { "id": "01a1d4a0-93b9-779b-b1c4-754c4993cb46", "name": "Work" },
+  "room": {
+    "name": "Storage",
+    "topic": "the storage engine",
+    "memories": 0,
+    "loci": [
+      { "name": "entrance", "position": 0, "count": 0, "…": "…" },
+      { "name": "Decisions", "position": 1, "count": 0, "…": "…" }
+    ],
+    "…": "…"
+  }
+}
+```
+
+Los recuerdos se guardan como siempre, con `remember` y `relate`, y después se anclan. Un locus que todavía no existe se crea; una sala, no. Sin `locus`, el recuerdo va a la entrada; con `"remove": true`, se quita el ancla y el recuerdo queda.
+
+```json
+{"name": "palace_anchor", "arguments": {
+  "memory": "01a1d4a0-93bc-77f0-bb99-3f87bd487361",
+  "room": "Storage", "locus": "Decisions", "note": "why writes are serial"}}
+```
+
+```json
+{
+  "anchored": true,
+  "locus_created": false,
+  "memory": { "id": "01a1d4a0-93bc-77f0-bb99-3f87bd487361", "name": "Only one transaction writes at a time" },
+  "places": [
+    {
+      "palace_name": "Work",
+      "room_name": "Storage",
+      "locus_name": "Decisions",
+      "note": "why writes are serial",
+      "…": "…"
+    }
+  ],
+  "…": "…"
+}
+```
+
+`palace_map` muestra qué hay y dónde: sin argumentos, cada palacio con sus salas, sus loci y cuántos recuerdos tiene cada uno; con `palace`, ese; con `room`, los recuerdos de cada locus.
+
+`palace_walk` va de un tema, o de un nodo (`from`), a los recuerdos que lo rodean. Encuentra las salas y los loci que el tema nombra y los recuerdos anclados que coinciden con él, y desde ellos sigue las relaciones del grafo, hasta `hops` (2 por defecto, 3 como máximo). Aquí dos notas están en la sala, y la tercera, que no está anclada, queda a una relación de una de ellas:
+
+```json
+{"name": "palace_walk", "arguments": {"topic": "storage engine"}}
+```
+
+```json
+{
+  "places": [
+    { "kind": "Room", "path": "Work / Storage", "…": "…" }
+  ],
+  "memories": [
+    {
+      "name": "“The whole database is one file”",
+      "hops": 0,
+      "places": [{ "room_name": "Storage", "locus_name": "entrance", "…": "…" }],
+      "…": "…"
+    },
+    {
+      "name": "“Only one transaction writes at a time”",
+      "hops": 0,
+      "places": [{ "room_name": "Storage", "locus_name": "Decisions", "note": "why writes are serial", "…": "…" }],
+      "…": "…"
+    },
+    {
+      "name": "“A replicated log orders the writes”",
+      "hops": 1,
+      "origin": "01a1d4a0-93bc-77f0-bb99-3f87bd487361",
+      "via": [{ "label": "leads_to", "forward": true, "…": "…" }],
+      "…": "…"
+    }
+  ]
+}
+```
+
+Un recorrido devuelve solo lo que está en un palacio o se alcanza desde él; un recuerdo que coincide con el tema y no está anclado le toca a `recall`.
+
+`palace_enter` reconstruye el contexto de una sala al empezar una sesión: sus recuerdos, los más fuertes primero, y los hechos que los conectan, como texto dentro de un presupuesto de tokens (`budget`, 1.500 por defecto), y el último checkpoint sobre la sala. Ese checkpoint se guarda con la herramienta `checkpoint`, con `about` igual al id de la sala.
+
+```json
+{"name": "palace_enter", "arguments": {"room": "Storage"}}
+```
+
+```json
+{
+  "palace": { "id": "01a1d4a0-93b9-779b-b1c4-754c4993cb46", "name": "Work" },
+  "room": { "name": "Storage", "memories": 2, "…": "…" },
+  "context": "## Memory\n[1] (Note)\nOnly one transaction writes at a time\n\n[2] (Note)\nThe whole database is one file\n\n## Facts\n- “Only one transaction writes at a time” leads_to “A replicated log orders the writes”\n",
+  "tokens": 74,
+  "memories": [
+    { "id": "01a1d4a0-93bc-77f0-bb99-3f87bd487361", "truncated": false, "…": "…" },
+    { "id": "01a1d4a0-93bc-77f1-a9b4-99670d911c39", "truncated": false, "…": "…" }
+  ],
+  "left_out": 0,
+  "checkpoint": {
+    "task": "Storage design",
+    "summary": "One writer settled",
+    "next": ["Measure the file"],
+    "…": "…"
+  }
+}
+```
+
+Recall, context, los resúmenes de comunidades, `maintain` y la extracción leen recuerdos y dejan fuera palacios, salas y loci: responden lo mismo con un palacio que sin él, y una sala con el nombre de un proyecto no se toma por el proyecto. Para renombrar o describir una sala usa `update`; `forget` borra una, y deja sus loci sin sala.
+
 ## Los hechos en el tiempo: `contradictions` y `timeline`
 
 Con una [restricción](../gq/constraints.md) como un empleador por persona, registrar que Ana trabaja en Globex desde 2024 terminó el hecho de Acme en esa fecha. `contradictions` lista esos choques, del más reciente al más antiguo, y lo que se hizo (el hecho anterior terminó, el nuevo se rechazó, o ambos quedaron marcados):
@@ -225,7 +351,7 @@ grafeno mcp --db agente.redb --namespace yo \
 | Opción | Efecto |
 | --- | --- |
 | `--allow vault,team-*` | Limita los namespaces que puede usar el agente. |
-| `--read-only` | Solo ofrece herramientas de lectura (`recall` no registra accesos; `ingest`, `checkpoint`, `feedback` y las demás que escriben quedan fuera). |
+| `--read-only` | Solo ofrece herramientas de lectura (`recall` no registra accesos; `ingest`, `checkpoint`, `feedback`, `palace_create`, `palace_create_room`, `palace_anchor` y las demás que escriben quedan fuera). |
 | `--as NAME` | Guarda `NAME` en `@recorded_by` para las escrituras del agente, y como agente de sus checkpoints. |
 | `--own-only` | Con `--as`, solo permite cambiar registros escritos por ese actor. |
 

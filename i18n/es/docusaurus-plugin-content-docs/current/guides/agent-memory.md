@@ -163,4 +163,4 @@ Cada nodo tiene una **importancia** (de 0 a 1, `SET n.@importance = 0.9`) y recu
 
 ## Por MCP
 
-Un agente conectado por [MCP](./mcp.md) tiene todo esto como herramientas: `remember`, `relate`, `forget`, `find_matches`, `merge`, `undo_merge`, `extract`, `maintain` (la salud de la memoria, duplicados, memorias débiles y grupos listos para consolidar, en un solo informe), `consolidate`, `feedback`, `summarize_communities`, y para textos largos, sesiones e historia `ingest`, `checkpoint`, `resume`, `timeline` y `contradictions`.
+Un agente conectado por [MCP](./mcp.md) tiene todo esto como herramientas: `remember`, `relate`, `forget`, `find_matches`, `merge`, `undo_merge`, `extract`, `maintain` (la salud de la memoria, duplicados, memorias débiles y grupos listos para consolidar, en un solo informe), `consolidate`, `feedback`, `summarize_communities`, y para textos largos, sesiones e historia `ingest`, `checkpoint`, `resume`, `timeline` y `contradictions`. Las [herramientas `palace_*`](./mcp.md#los-recuerdos-por-lugar-las-herramientas-palace_) ordenan esos recuerdos en salas.

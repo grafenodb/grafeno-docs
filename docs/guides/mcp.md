@@ -24,7 +24,7 @@ An MCP client's configuration (where the file lives and what it is called depend
 }
 ```
 
-The server tells the agent how to use it when it connects: call `context` (or `recall`) before answering anything that may depend on what it knows, `remember` new facts and decisions, `relate` nodes, `resume` at the start of ongoing work and `checkpoint` before stopping. Every tool takes an optional `namespace`; without one it uses `--namespace`. Ids are the UUIDs the tools return.
+The server tells the agent how to use it when it connects: call `context` (or `recall`) before answering anything that may depend on what it knows, `remember` new facts and decisions, `relate` nodes, `resume` at the start of ongoing work and `checkpoint` before stopping, and keep the memories of a project together in a room of a palace. Every tool takes an optional `namespace`; without one it uses `--namespace`. Ids are the UUIDs the tools return.
 
 ## The tools
 
@@ -34,6 +34,7 @@ The server tells the agent how to use it when it connects: call `context` (or `r
 | Find and read | `recall` (words, meaning and the graph, each result with why it matched), `context` (memories and facts as text within a token budget), `get_node`, `query` (read-only [GQ](../gq/index.md), 200 rows at most), `overview` (community summaries for broad questions) |
 | Store long texts | `ingest` (a document, a conversation or code, cut into chunks) |
 | Pick work up again | `checkpoint` (where a task stands), `resume` (its latest checkpoint and what changed since) |
+| Arrange memories into places | `palace_create`, `palace_create_room`, `palace_anchor` (an existing memory at a place in a room), `palace_map`, `palace_walk` (from a topic to the memories around it), `palace_enter` (a room's context and its checkpoint) |
 | Follow facts over time | `timeline` (how a node changed), `contradictions` (facts that clashed under a constraint), `changes` (what was written since a sequence number) |
 | Keep memory in shape | `maintain` (health, likely duplicates, fading memories, groups to summarize), `feedback` (useful, obsolete, wrong), `merge`, `undo_merge`, `consolidate`, `find_matches` |
 | Link what texts mention | `extract`, `add_mentions`, `review`, `resolve_review` |
@@ -139,6 +140,131 @@ In the next session, this agent or another one resumes it, and learns what was w
 
 `resume` without a task returns the latest checkpoint of any; `about` or `agent` narrow it. When nothing matches, it lists the tasks that have checkpoints.
 
+## Memories by place: the `palace_*` tools
+
+A mental palace arranges memories that already exist into places, so an agent finds them again by where they are. A **palace** (`Work`) has **rooms**, one per project or subject; a room has **loci**, places inside it (every room has one named `entrance`); and a memory is **anchored** at one or several loci. The memory is not copied or changed and keeps its own relations: an anchor is one more edge. A palace lives in one namespace, and it is ordinary nodes and edges, so it is saved with everything else.
+
+These examples come from another session, with three notes about a storage engine.
+
+A palace and a room are made once; asking again returns the ones there are. A palace or a room is given by its name or its id.
+
+```json
+{"name": "palace_create", "arguments": {"name": "Work", "description": "Projects I work on"}}
+{"name": "palace_create_room", "arguments": {
+  "palace": "Work", "name": "Storage", "topic": "the storage engine", "loci": ["Decisions"]}}
+```
+
+```json
+{
+  "created": true,
+  "id": "01a1d4a0-93ba-735b-8a34-93a7400f181d",
+  "palace": { "id": "01a1d4a0-93b9-779b-b1c4-754c4993cb46", "name": "Work" },
+  "room": {
+    "name": "Storage",
+    "topic": "the storage engine",
+    "memories": 0,
+    "loci": [
+      { "name": "entrance", "position": 0, "count": 0, "…": "…" },
+      { "name": "Decisions", "position": 1, "count": 0, "…": "…" }
+    ],
+    "…": "…"
+  }
+}
+```
+
+Memories are stored as always, with `remember` and `relate`, and then anchored. A locus that does not exist yet is made; a room is not. Without `locus`, the memory goes to the entrance; with `"remove": true`, the anchor is taken away and the memory stays.
+
+```json
+{"name": "palace_anchor", "arguments": {
+  "memory": "01a1d4a0-93bc-77f0-bb99-3f87bd487361",
+  "room": "Storage", "locus": "Decisions", "note": "why writes are serial"}}
+```
+
+```json
+{
+  "anchored": true,
+  "locus_created": false,
+  "memory": { "id": "01a1d4a0-93bc-77f0-bb99-3f87bd487361", "name": "Only one transaction writes at a time" },
+  "places": [
+    {
+      "palace_name": "Work",
+      "room_name": "Storage",
+      "locus_name": "Decisions",
+      "note": "why writes are serial",
+      "…": "…"
+    }
+  ],
+  "…": "…"
+}
+```
+
+`palace_map` shows what is where: with no arguments, every palace with its rooms, loci and how many memories each holds; with `palace`, that one; with `room`, the memories at each locus.
+
+`palace_walk` goes from a topic, or from a node (`from`), to the memories around it. It finds the rooms and loci the topic names and the anchored memories that match it, then follows the graph's relations from those, up to `hops` (2 by default, 3 at most). Here two notes are in the room, and the third, anchored nowhere, is one relation away from one of them:
+
+```json
+{"name": "palace_walk", "arguments": {"topic": "storage engine"}}
+```
+
+```json
+{
+  "places": [
+    { "kind": "Room", "path": "Work / Storage", "…": "…" }
+  ],
+  "memories": [
+    {
+      "name": "“The whole database is one file”",
+      "hops": 0,
+      "places": [{ "room_name": "Storage", "locus_name": "entrance", "…": "…" }],
+      "…": "…"
+    },
+    {
+      "name": "“Only one transaction writes at a time”",
+      "hops": 0,
+      "places": [{ "room_name": "Storage", "locus_name": "Decisions", "note": "why writes are serial", "…": "…" }],
+      "…": "…"
+    },
+    {
+      "name": "“A replicated log orders the writes”",
+      "hops": 1,
+      "origin": "01a1d4a0-93bc-77f0-bb99-3f87bd487361",
+      "via": [{ "label": "leads_to", "forward": true, "…": "…" }],
+      "…": "…"
+    }
+  ]
+}
+```
+
+A walk returns only what is in a palace or reached from it; a memory that matches the topic and is anchored nowhere is `recall`'s to find.
+
+`palace_enter` rebuilds a room's context at the start of a session: its memories, the strongest first, and the facts that connect them, as text within a token `budget` (1,500 by default), and the latest checkpoint about the room. Saving that checkpoint is the `checkpoint` tool, with `about` set to the room's id.
+
+```json
+{"name": "palace_enter", "arguments": {"room": "Storage"}}
+```
+
+```json
+{
+  "palace": { "id": "01a1d4a0-93b9-779b-b1c4-754c4993cb46", "name": "Work" },
+  "room": { "name": "Storage", "memories": 2, "…": "…" },
+  "context": "## Memory\n[1] (Note)\nOnly one transaction writes at a time\n\n[2] (Note)\nThe whole database is one file\n\n## Facts\n- “Only one transaction writes at a time” leads_to “A replicated log orders the writes”\n",
+  "tokens": 74,
+  "memories": [
+    { "id": "01a1d4a0-93bc-77f0-bb99-3f87bd487361", "truncated": false, "…": "…" },
+    { "id": "01a1d4a0-93bc-77f1-a9b4-99670d911c39", "truncated": false, "…": "…" }
+  ],
+  "left_out": 0,
+  "checkpoint": {
+    "task": "Storage design",
+    "summary": "One writer settled",
+    "next": ["Measure the file"],
+    "…": "…"
+  }
+}
+```
+
+Recall, context, community summaries, `maintain` and extraction read memories and leave palaces, rooms and loci out: they answer the same with a palace as without one, and a room named after a project is not taken for the project. To rename or describe a room use `update`; `forget` deletes one, and leaves its loci without a room.
+
 ## Facts over time: `contradictions` and `timeline`
 
 With a [constraint](../gq/constraints.md) such as one employer per person, recording that Ana works at Globex from 2024 ended the Acme fact on that date. `contradictions` lists such clashes, newest first, and what was done (the earlier fact ended, the new one refused, or both kept and flagged):
@@ -225,7 +351,7 @@ grafeno mcp --db agent.redb --namespace me \
 | Option | Effect |
 | --- | --- |
 | `--allow vault,team-*` | Limit the namespaces the agent may use. |
-| `--read-only` | Offer only reading tools (`recall` records no accesses; `ingest`, `checkpoint`, `feedback` and every other writing tool are left out). |
+| `--read-only` | Offer only reading tools (`recall` records no accesses; `ingest`, `checkpoint`, `feedback`, `palace_create`, `palace_create_room`, `palace_anchor` and every other writing tool are left out). |
 | `--as NAME` | Save `NAME` in `@recorded_by` for the agent's writes, and as the agent of its checkpoints. |
 | `--own-only` | With `--as`, only allow changes to records written by that actor. |
 

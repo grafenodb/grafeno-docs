@@ -117,7 +117,7 @@ El tokenizador pasa el texto a forma NFD, quita acentos y mayúsculas, parte por
 
 El motor resuelve entidades, propone duplicados, registra fusiones que se pueden deshacer y resume comunidades. La extracción con un modelo de lenguaje queda fuera del núcleo: la hace el cliente, o `grafeno extract` prepara los textos nuevos y cambiados para revisión.
 
-Por MCP, un agente tiene herramientas directas: `remember`, `recall`, `context`, `relate`, `update`, `forget` y `get_node`, más `query`, `merge`, `undo_merge`, `overview`, `changes` y el resumen de comunidades; `ingest` para documentos, conversaciones y código; `checkpoint` y `resume` para retomar el trabajo en otra sesión; `timeline`, `contradictions` y `feedback`. `context` devuelve texto compacto, listo para meter en el prompt. `forget` puede invalidar un hecho, retractarlo o borrarlo; invalidar es lo habitual cuando el mundo cambió.
+Por MCP, un agente tiene herramientas directas: `remember`, `recall`, `context`, `relate`, `update`, `forget` y `get_node`, más `query`, `merge`, `undo_merge`, `overview`, `changes` y el resumen de comunidades; `ingest` para documentos, conversaciones y código; `checkpoint` y `resume` para retomar el trabajo en otra sesión; `timeline`, `contradictions` y `feedback`; y las herramientas `palace_*` para ordenar los recuerdos en salas y entrar en una al empezar una sesión. `context` devuelve texto compacto, listo para meter en el prompt. `forget` puede invalidar un hecho, retractarlo o borrarlo; invalidar es lo habitual cuando el mundo cambió.
 
 ### Quién puede ver qué
 
