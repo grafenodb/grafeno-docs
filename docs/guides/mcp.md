@@ -140,6 +140,12 @@ In the next session, this agent or another one resumes it, and learns what was w
 
 `resume` without a task returns the latest checkpoint of any; `about` or `agent` narrow it. When nothing matches, it lists the tasks that have checkpoints.
 
+## Kinds, relations and provenance
+
+A memory says what kind it is with a label. These have a meaning: `Fact`, `Decision`, `Experience`, `Task`, `Question`, `Episode` (raw material as it came), `Concept`, `Hypothesis`, `Evidence`, `Constraint` (a rule of the domain) and `Goal`. A fact can have any label; these have a meaning: `related_to`, `depends_on`, `part_of`, `derived_from`, `supported_by`, `contradicts`, `supersedes` and `caused_by`, which `relate` refuses without `sources`, since a cause needs its evidence named.
+
+`remember` and `relate` take `method`, how something was obtained (`agent`, `rule`, `stated`, `imported`); `get_node` answers a `provenance` block with the sources, who recorded it and how, what supports it and what merges brought in. The same current fact is recorded once: `relate` answers `"duplicate": true` with the one there is, and `maintain` lists facts stored twice. A merge keeps what the merged node was and how it was known, in `merged_from`.
+
 ## Memories by place: the `palace_*` tools
 
 A mental palace arranges memories that already exist into places, so an agent finds them again by where they are. A **palace** (`Work`) has **rooms**, one per project or subject; a room has **loci**, places inside it (every room has one named `entrance`); and a memory is **anchored** at one or several loci. The memory is not copied or changed and keeps its own relations: an anchor is one more edge. A palace lives in one namespace, and it is ordinary nodes and edges, so it is saved with everything else.

@@ -140,6 +140,12 @@ En la siguiente sesión, este agente u otro la retoma, y se entera de lo que se 
 
 `resume` sin tarea devuelve el último checkpoint de cualquiera; `about` o `agent` lo acotan. Si nada coincide, lista las tareas que tienen checkpoints.
 
+## Tipos, relaciones y procedencia
+
+Un recuerdo dice de qué tipo es con una etiqueta. Estas tienen significado: `Fact`, `Decision`, `Experience`, `Task`, `Question`, `Episode` (material en bruto tal como llegó), `Concept`, `Hypothesis`, `Evidence`, `Constraint` (una regla del dominio) y `Goal`. Un hecho puede tener cualquier etiqueta; estas tienen significado: `related_to`, `depends_on`, `part_of`, `derived_from`, `supported_by`, `contradicts`, `supersedes` y `caused_by`, que `relate` rechaza sin `sources`, porque una causa necesita nombrar su evidencia.
+
+`remember` y `relate` aceptan `method`, cómo se obtuvo algo (`agent`, `rule`, `stated`, `imported`); `get_node` responde un bloque `provenance` con las fuentes, quién lo registró y cómo, qué lo respalda y qué trajeron las fusiones. El mismo hecho vigente se registra una vez: `relate` responde `"duplicate": true` con el que ya está, y `maintain` lista los hechos guardados dos veces. Una fusión conserva lo que era el nodo fusionado y cómo se conocía, en `merged_from`.
+
 ## Los recuerdos por lugar: las herramientas `palace_*`
 
 Un palacio mental ordena en lugares recuerdos que ya existen, para que un agente los vuelva a encontrar por dónde están. Un **palacio** (`Work`) tiene **salas**, una por proyecto o tema; una sala tiene **loci**, lugares dentro de ella (toda sala tiene uno llamado `entrance`); y un recuerdo se **ancla** en uno o varios loci. El recuerdo no se copia ni cambia y conserva sus relaciones: un ancla es una arista más. Un palacio vive en un namespace, y son nodos y aristas normales, así que se guarda con todo lo demás.
