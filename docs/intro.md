@@ -117,7 +117,7 @@ The tokenizer converts text to NFD, strips accents and case, splits on character
 
 The engine resolves entities, suggests duplicates, records merges that can be undone and summarizes communities. Extraction with a language model stays outside the core: the client does it, or `grafeno extract` prepares new and changed texts for review.
 
-Over MCP, an agent has direct tools: `remember`, `recall`, `context`, `relate`, `update`, `forget` and `get_node`, plus `query`, `merge`, `undo_merge`, `overview`, `changes` and community summaries. `context` returns compact text, ready to place in the prompt. `forget` can invalidate a fact, retract it or delete it; invalidating is the usual choice when the world changed.
+Over MCP, an agent has direct tools: `remember`, `recall`, `context`, `relate`, `update`, `forget` and `get_node`, plus `query`, `merge`, `undo_merge`, `overview`, `changes` and community summaries; `ingest` for documents, conversations and code; `checkpoint` and `resume` to pick work up in a later session; `timeline`, `contradictions` and `feedback`. `context` returns compact text, ready to place in the prompt. `forget` can invalidate a fact, retract it or delete it; invalidating is the usual choice when the world changed.
 
 ### Who can see what
 

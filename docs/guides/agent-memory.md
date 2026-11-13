@@ -163,4 +163,4 @@ Every node has an **importance** (0 to 1, `SET n.@importance = 0.9`) and remembe
 
 ## Through MCP
 
-An agent connected over [MCP](./mcp.md) has all of this as tools: `remember`, `relate`, `forget`, `find_matches`, `merge`, `undo_merge`, `extract`, `maintain` (duplicates, weak memories and groups ready to consolidate, in one report), `consolidate`, `summarize_communities`.
+An agent connected over [MCP](./mcp.md) has all of this as tools: `remember`, `relate`, `forget`, `find_matches`, `merge`, `undo_merge`, `extract`, `maintain` (the memory's health, duplicates, weak memories and groups ready to consolidate, in one report), `consolidate`, `feedback`, `summarize_communities`, and for long texts, sessions and history `ingest`, `checkpoint`, `resume`, `timeline` and `contradictions`.
