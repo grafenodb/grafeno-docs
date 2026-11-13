@@ -246,10 +246,13 @@ A walk returns only what is in a palace or reached from it; a memory that matche
 Three more things a walk does:
 
 - **Doors.** A `leads_to` fact from one room to another, recorded with `relate`, is a door. `palace_map` lists a room's doors, and a walk goes through the doors of the rooms it found: what is anchored beyond is one step away, with the door in its `via`.
-- **Relevance.** `"order": "relevance"` ranks what the walk reached by how well its words match the topic (whole words), then by distance. Each memory says its `relevance`.
+- **Relevance.** `"order": "relevance"` ranks what the walk reached by how well its words match the topic (whole words), then by distance. A memory reached through relations also inherits half the relevance of the one it was reached from, per relation, so what the best match leads to is not buried under weak matches. Each memory says its `relevance`.
 - **A context.** `"budget": 600` also returns the memories reached and the facts that join them as text within that many tokens. A question that needs several memories joined, such as who maintains the service an outage hit, is answered by that text, with the way that joined them in each memory's `via`.
+- **Only some relations, or a past time.** `"relations": ["hit", "depends_on", "maintains"]` follows only those labels; `"valid_at": "2025-06-01"` follows only the facts true then, so the walk reaches who maintained the store at that date. A walk `from` an entity is a recall about that entity.
+- **How, and on what grounds.** Each memory says how the walk found it (`found_by`, in words, beside `via`) and, apart, what supports it or puts it in doubt (`justification`: its `sources`, how it is `known`, and what it is `supported_by`, `contradicted_by` and `superseded_by`). `recall` answers the same `justification` beside its `why`. The two are kept apart: a score is not evidence.
+- **The next part.** `"skip": 20` leaves out what was already read; `recall` and `context` take it too.
 
-`context`, `palace_enter` and a walk's context leave out a memory whose words are nearly those of one already packed, and say how many they left out.
+`context`, `palace_enter` and a walk's context leave out a memory whose words are nearly those of one already packed, and say how many they left out. They pack memories joined by a fact next to each other, and say their token count is an estimate (`tokens_estimated`). `recall` and `context` scale each search's scores before fusing them, so what the best match is related to can outrank weak matches; `"fusion": "rank"` fuses by rank alone.
 
 A palace changes as the work does:
 

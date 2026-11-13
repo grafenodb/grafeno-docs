@@ -246,10 +246,13 @@ Un recorrido devuelve solo lo que está en un palacio o se alcanza desde él; un
 Tres cosas más que hace un recorrido:
 
 - **Puertas.** Un hecho `leads_to` de una sala a otra, registrado con `relate`, es una puerta. `palace_map` lista las puertas de una sala, y un recorrido atraviesa las puertas de las salas que encontró: lo anclado al otro lado queda a un paso, con la puerta en su `via`.
-- **Relevancia.** `"order": "relevance"` ordena lo alcanzado por cuánto coinciden sus palabras con el tema (palabras enteras) y después por distancia. Cada recuerdo dice su `relevance`.
+- **Relevancia.** `"order": "relevance"` ordena lo alcanzado por cuánto coinciden sus palabras con el tema (palabras enteras) y después por distancia. Un recuerdo alcanzado por relaciones hereda además la mitad de la relevancia de aquel desde el que se llegó, por cada relación, para que lo que sigue a la mejor coincidencia no quede debajo de coincidencias débiles. Cada recuerdo dice su `relevance`.
 - **Un contexto.** `"budget": 600` devuelve además los recuerdos alcanzados y los hechos que los unen como texto dentro de ese número de tokens. Una pregunta que necesita unir varios recuerdos, como quién mantiene el servicio al que afectó una caída, se responde con ese texto, con el camino que los unió en el `via` de cada recuerdo.
+- **Solo algunas relaciones, o un momento pasado.** `"relations": ["hit", "depends_on", "maintains"]` sigue solo esas etiquetas; `"valid_at": "2025-06-01"` sigue solo los hechos vigentes entonces, así que el recorrido llega a quien mantenía el almacén en esa fecha. Un recorrido `from` una entidad es un recall sobre esa entidad.
+- **Cómo y con qué fundamento.** Cada recuerdo dice cómo lo encontró el recorrido (`found_by`, en palabras, junto a `via`) y, aparte, qué lo respalda o lo pone en duda (`justification`: sus `sources`, cómo se sabe (`known`), y qué lo respalda (`supported_by`), lo contradice (`contradicted_by`) o lo reemplazó (`superseded_by`)). `recall` responde la misma `justification` junto a su `why`. Las dos cosas van aparte: una puntuación no es evidencia.
+- **La parte siguiente.** `"skip": 20` deja fuera lo ya leído; `recall` y `context` también lo aceptan.
 
-`context`, `palace_enter` y el contexto de un recorrido dejan fuera un recuerdo cuyas palabras son casi las de otro ya incluido, y dicen cuántos dejaron fuera.
+`context`, `palace_enter` y el contexto de un recorrido dejan fuera un recuerdo cuyas palabras son casi las de otro ya incluido, y dicen cuántos dejaron fuera. Ponen juntos los recuerdos unidos por un hecho y declaran que su cuenta de tokens es una estimación (`tokens_estimated`). `recall` y `context` escalan las puntuaciones de cada búsqueda antes de fusionarlas, así que lo relacionado con la mejor coincidencia puede superar a coincidencias débiles; `"fusion": "rank"` fusiona solo por rango.
 
 Un palacio cambia con el trabajo:
 
