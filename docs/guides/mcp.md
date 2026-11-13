@@ -357,6 +357,22 @@ grafeno mcp --db agent.redb --namespace me \
 
 Several agents sharing one memory, each with its own permissions, use the HTTP API with [accounts and roles](access.md) instead: one server, one file, and a key per agent.
 
+## Watch the agent's memory as it writes
+
+The MCP process opens its database file directly, and only one process can open a file: while the agent runs, Grafeno Studio or `grafeno shell --db` cannot open it too, and say it is already open. Let the agent's MCP server also serve the HTTP API on the same database, and connect to that instead:
+
+```bash
+grafeno mcp --db agent.redb --namespace me --listen 127.0.0.1:7810 --token "$GRAFENO_TOKEN"
+```
+
+In the client's configuration, the same arguments go in `args`. Then connect Grafeno Studio to `http://127.0.0.1:7810` with that token, or a console:
+
+```bash
+grafeno shell --url http://127.0.0.1:7810 --token "$GRAFENO_TOKEN"
+```
+
+What the agent stores appears there at once, in queries and in the change log the graph view follows, and what you write there the agent recalls. `--listen` takes `--token` (or `GRAFENO_TOKEN`) and `--cors-origins`. Without a token, keep the address on `127.0.0.1`.
+
 :::warning Database ownership
-The MCP process opens its database file directly. It cannot share that file with `grafeno serve` or another MCP process. Use different files for separate agents unless they reach the memory through the HTTP API.
+A second process on a file that is open is refused, with a message that says how to connect instead. Use different files for separate agents unless they reach the memory through one server's HTTP API.
 :::

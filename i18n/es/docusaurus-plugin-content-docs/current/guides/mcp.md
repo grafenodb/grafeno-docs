@@ -357,6 +357,22 @@ grafeno mcp --db agente.redb --namespace yo \
 
 Varios agentes que comparten una memoria, cada uno con sus permisos, usan en cambio la API HTTP con [cuentas y roles](access.md): un servidor, un archivo y una clave por agente.
 
+## Ver la memoria del agente mientras escribe
+
+El proceso MCP abre su archivo de base directamente, y solo un proceso puede abrir un archivo: mientras el agente funciona, Grafeno Studio o `grafeno shell --db` no pueden abrirlo a la vez, y dicen que ya está abierto. Haz que el servidor MCP del agente sirva también la API HTTP sobre la misma base, y conéctate a ella:
+
+```bash
+grafeno mcp --db agente.redb --namespace yo --listen 127.0.0.1:7810 --token "$GRAFENO_TOKEN"
+```
+
+En la configuración del cliente, los mismos argumentos van en `args`. Después conecta Grafeno Studio a `http://127.0.0.1:7810` con ese token, o una consola:
+
+```bash
+grafeno shell --url http://127.0.0.1:7810 --token "$GRAFENO_TOKEN"
+```
+
+Lo que el agente guarda aparece allí al momento, en las consultas y en el registro de cambios que sigue la vista del grafo, y lo que escribas allí el agente lo recuerda. `--listen` acepta `--token` (o `GRAFENO_TOKEN`) y `--cors-origins`. Sin token, mantén la dirección en `127.0.0.1`.
+
 :::warning Propiedad de la base
-El proceso MCP abre su archivo de base directamente. No puede compartirlo con `grafeno serve` ni con otro proceso MCP. Usa archivos distintos para agentes separados, salvo que lleguen a la memoria por la API HTTP.
+Un segundo proceso sobre un archivo abierto se rechaza, con un mensaje que explica cómo conectarse. Usa archivos distintos para agentes separados, salvo que lleguen a la memoria por la API HTTP de un solo servidor.
 :::
