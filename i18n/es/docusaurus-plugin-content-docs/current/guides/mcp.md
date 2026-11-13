@@ -34,7 +34,7 @@ El servidor le explica al agente cómo usarlo al conectarse: llamar a `context` 
 | Encontrar y leer | `recall` (palabras, significado y grafo, cada resultado con el porqué), `context` (recuerdos y hechos como texto dentro de un presupuesto de tokens), `get_node`, `query` ([GQ](../gq/index.md) de solo lectura, 200 filas como máximo), `overview` (resúmenes de comunidades para preguntas amplias) |
 | Guardar textos largos | `ingest` (un documento, una conversación o código, cortado en fragmentos) |
 | Retomar el trabajo | `checkpoint` (en qué quedó una tarea), `resume` (su último checkpoint y lo que cambió desde entonces) |
-| Ordenar los recuerdos en lugares | `palace_create`, `palace_create_room`, `palace_anchor` (un recuerdo que ya existe en un lugar de una sala), `palace_map`, `palace_walk` (de un tema a los recuerdos que lo rodean), `palace_enter` (el contexto de una sala y su checkpoint), `palace_review` (propuestas para ordenarlo mejor) |
+| Ordenar los recuerdos en lugares | `palace_create`, `palace_create_room`, `palace_anchor` (un recuerdo que ya existe en un lugar de una sala), `palace_map`, `palace_walk` (de un tema a los recuerdos que lo rodean), `palace_enter` (el contexto de una sala y su checkpoint), `palace_review` (propuestas para ordenarlo mejor), `palace_reflect` (lo que se sabe, y lo que no) |
 | Seguir los hechos en el tiempo | `timeline` (cómo cambió un nodo), `contradictions` (hechos que chocaron bajo una restricción), `changes` (lo escrito desde un número de secuencia) |
 | Mantener la memoria en forma | `maintain` (salud, posibles duplicados, recuerdos que se desvanecen, grupos para resumir), `feedback` (útil, obsoleto, incorrecto), `merge`, `undo_merge`, `consolidate`, `find_matches` |
 | Enlazar lo que mencionan los textos | `extract`, `add_mentions`, `review`, `resolve_review` |
@@ -251,6 +251,17 @@ Un palacio cambia con el trabajo:
 - `forget` sobre un palacio, una sala o un locus lo borra con lo que hay debajo (salas, loci, anclas), y nunca un recuerdo. `"dry_run": true` dice antes qué se iría.
 - `maintain` lista recuerdos antiguos que uno más nuevo sobre la misma entidad puede haber superado, para que el agente lo juzgue; `feedback` `obsolete` archiva el antiguo.
 - `consolidate` con `"undo"` y el id de un resumen borra el resumen y recupera los recuerdos que había archivado.
+
+Antes de responder sobre terreno incierto, un agente puede preguntar qué sabe. `palace_reflect` con un `topic`, una `room` o un `node` responde, cada elemento con el registro de donde sale:
+
+- **known**: los recuerdos y hechos encontrados, contados por tipo y por cómo se saben, con los verificados nombrados;
+- **uncertain**: lo inferido sin fuente, o con certeza baja;
+- **conflicts**: los choques registrados bajo restricciones, primero los no resueltos;
+- **stale**: hechos que terminaron, recuerdos archivados u obsoletos, recuerdos sin usar hace mucho, antiguos que uno más nuevo puede haber superado;
+- **gaps**: preguntas abiertas, cosas mencionadas y nunca descritas, lugares vacíos, pasos pendientes de un checkpoint;
+- **next**: qué comprobar, con la llamada que lo hace.
+
+Un tema sin nada guardado responde `"nothing": true`, sin ofrecer un recuerdo sin relación en su lugar. Una pregunta es un recuerdo con la etiqueta `Question`, abierta hasta que un recuerdo se relaciona con ella con `answers`. La reflexión no escribe ni juzga nada: el origen y la certeza son lo que dijeron los agentes.
 
 `palace_enter` reconstruye el contexto de una sala al empezar una sesión: sus recuerdos, los más fuertes primero, y los hechos que los conectan, como texto dentro de un presupuesto de tokens (`budget`, 1.500 por defecto), y el último checkpoint sobre la sala. Ese checkpoint se guarda con la herramienta `checkpoint`, con `about` igual al id de la sala.
 

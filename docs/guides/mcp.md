@@ -34,7 +34,7 @@ The server tells the agent how to use it when it connects: call `context` (or `r
 | Find and read | `recall` (words, meaning and the graph, each result with why it matched), `context` (memories and facts as text within a token budget), `get_node`, `query` (read-only [GQ](../gq/index.md), 200 rows at most), `overview` (community summaries for broad questions) |
 | Store long texts | `ingest` (a document, a conversation or code, cut into chunks) |
 | Pick work up again | `checkpoint` (where a task stands), `resume` (its latest checkpoint and what changed since) |
-| Arrange memories into places | `palace_create`, `palace_create_room`, `palace_anchor` (an existing memory at a place in a room), `palace_map`, `palace_walk` (from a topic to the memories around it), `palace_enter` (a room's context and its checkpoint), `palace_review` (proposals to arrange it better) |
+| Arrange memories into places | `palace_create`, `palace_create_room`, `palace_anchor` (an existing memory at a place in a room), `palace_map`, `palace_walk` (from a topic to the memories around it), `palace_enter` (a room's context and its checkpoint), `palace_review` (proposals to arrange it better), `palace_reflect` (what is known, and what is not) |
 | Follow facts over time | `timeline` (how a node changed), `contradictions` (facts that clashed under a constraint), `changes` (what was written since a sequence number) |
 | Keep memory in shape | `maintain` (health, likely duplicates, fading memories, groups to summarize), `feedback` (useful, obsolete, wrong), `merge`, `undo_merge`, `consolidate`, `find_matches` |
 | Link what texts mention | `extract`, `add_mentions`, `review`, `resolve_review` |
@@ -251,6 +251,17 @@ A palace changes as the work does:
 - `forget` on a palace, a room or a locus deletes it with what is under it (rooms, loci, anchors), and never a memory. `"dry_run": true` says what would go first.
 - `maintain` lists older memories that a newer one about the same entity may overtake, for the agent to judge; `feedback` `obsolete` archives the older one.
 - `consolidate` with `"undo"` and a summary's id deletes the summary and brings back the memories it archived.
+
+Before answering on uncertain ground, an agent can ask what it knows. `palace_reflect` with a `topic`, a `room` or a `node` answers, each item with the record it comes from:
+
+- **known**: the memories and facts found, counted by kind and by how they are known, the verified ones named;
+- **uncertain**: what was inferred with no source, or has a low certainty;
+- **conflicts**: clashes recorded under constraints, the unsettled first;
+- **stale**: facts that ended, archived or obsolete memories, memories long unused, older ones a newer memory may overtake;
+- **gaps**: open questions, things mentioned and never described, empty places, steps left in a checkpoint;
+- **next**: what to check, with the call that does it.
+
+A topic with nothing stored answers `"nothing": true`, and no unrelated memory in its place. A question is a memory labeled `Question`, open until a memory is related to it with `answers`. The reflection writes nothing and judges nothing: origin and certainty are what agents stated.
 
 `palace_enter` rebuilds a room's context at the start of a session: its memories, the strongest first, and the facts that connect them, as text within a token `budget` (1,500 by default), and the latest checkpoint about the room. Saving that checkpoint is the `checkpoint` tool, with `about` set to the room's id.
 
