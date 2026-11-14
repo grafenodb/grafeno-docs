@@ -5,24 +5,91 @@ description: Give an agent Grafeno as its long-term memory over the Model Contex
 
 # MCP for agents
 
-`grafeno mcp` speaks MCP over standard input and output. The agent's client starts the process and exchanges JSON-RPC with it; logs go to standard error. It needs no server: the process opens its database file itself.
+Grafeno gives an agent a long-term memory over MCP, the protocol agents use to call tools. The agent's client (the program the agent runs in) starts `grafeno mcp` and talks with it over standard input and output; logs go to standard error. The agent gets tools to remember, recall, pick work up again and arrange what it knows into palaces.
+
+## Set it up
+
+### 1. Choose where the memory lives
+
+| | The Grafeno server (recommended) | A file of its own |
+| --- | --- | --- |
+| How | `grafeno mcp --url` runs its tools on a running server | `grafeno mcp --db` opens a database file |
+| Good for | everyday use: several agents at once, Grafeno Studio or the console watching as the agent writes | trying it out, one agent |
+| To start by hand | nothing when the server runs as a service; otherwise `grafeno serve` before the agent | nothing: the client starts it |
+| Limit | the server must be running when the agent calls a tool | only one process can open a file: while the agent runs, nothing else can open it |
+
+The installers and packages set the server up as a service that starts with the machine ([Install](../get-started/install.md)), on `http://127.0.0.1:7810`. Check that it answers:
 
 ```bash
-grafeno mcp --db agent.redb --namespace me
+curl http://127.0.0.1:7810/health
 ```
 
-An MCP client's configuration (where the file lives and what it is called depend on the client):
+### 2. Give the agent a key
+
+The agent signs its requests with a key of its own, limited to its namespace (here `me`, created with the first write). On the server's machine, as an administrator, since only administrators can read the settings file:
+
+```bash
+# Linux
+sudo grafeno keys create my-agent --grant me:write --config /etc/grafeno/grafeno.toml
+# Windows, in a terminal run as administrator
+grafeno keys create my-agent --grant me:write --config C:\ProgramData\Grafeno\grafeno.toml
+```
+
+The key's secret is printed once: copy it. Grafeno Studio makes keys too, in **Administration**. Check that the key works; the answer lists the tools it may use:
+
+```bash
+curl -H "Authorization: Bearer <the key>" http://127.0.0.1:7810/v1/me/tools
+```
+
+### 3. Add Grafeno to the agent's client
+
+Clients keep their MCP servers in a settings file, and some have a command that writes it; their documentation says where. Most take this JSON as it is:
 
 ```json
 {
   "mcpServers": {
     "grafeno": {
       "command": "grafeno",
-      "args": ["mcp", "--db", "/path/to/agent.redb", "--namespace", "me"]
+      "args": ["mcp", "--url", "http://127.0.0.1:7810", "--token", "<the key>", "--namespace", "me"]
     }
   }
 }
 ```
+
+With a file of its own instead of the server, the arguments are `["mcp", "--db", "/path/to/agent.redb", "--namespace", "me"]`.
+
+If `grafeno` is not on the `PATH`, or an older copy is found first (`grafeno --version` says which), write the full path in `command`, such as `C:\\Program Files\\Grafeno\\grafeno.exe`.
+
+A client reads its MCP servers when a session starts: open a new session after changing them.
+
+### 4. Check that the agent uses it
+
+Ask the agent to call `palace_map`. The client shows each tool call with the server's name (`grafeno`); a client without the tools says it has none by that name. When the server is down, or the key is wrong, the tool answers so (`did not answer`, `refused it (401)`), and the next call works once it is fixed, with no new session.
+
+### 5. Arrange the memory
+
+| Level | Use it for | Example |
+| --- | --- | --- |
+| Namespace | a person or an agent, or what must stay apart (another customer, another team's rights) | `me` |
+| Palace | a project | `Billing` |
+| Room | an area of the project | `API`, `Database`, `Docs` |
+| Locus | a subject inside the area | `Releases` |
+| Memory | a decision, a problem, something learned, anchored at a locus | "Invoices are retried three times" |
+| Checkpoint | where a task stands at the end of a session | "Move billing to events" |
+
+One namespace with a palace per project keeps what holds everywhere (preferences, ways of working) in one place, and lets a memory of one project relate to another's. A namespace per session would lose the point: the next session would start with nothing. Tell the agent which palace its project uses in the instructions its client reads for the project, such as: "Grafeno is this project's memory; its palace is `Billing`. At the start, call `palace_enter`; before stopping, save a `checkpoint`."
+
+### When something fails
+
+| You see | Why | What to do |
+| --- | --- | --- |
+| `Database already open. Cannot acquire lock.` | another process has the file open: another session's `grafeno mcp --db`, or a server on it | use the server (`--url`), or close the other process |
+| The agent has no Grafeno tools | the session started before Grafeno was added, or the client could not start the command | open a new session; check `command` with its full path |
+| `did not answer` | the server is not running | start the service or `grafeno serve` |
+| `refused it (401)` | a wrong or revoked key | check the key in `args` |
+| `refused it (403)` | the key has no right on that namespace | grant it (`--grant me:write`) or use its namespace |
+
+## How the agent uses it
 
 The server tells the agent how to use it when it connects: call `context` (or `recall`) before answering anything that may depend on what it knows, `remember` new facts and decisions, `relate` nodes, `resume` at the start of ongoing work and `checkpoint` before stopping, and keep the memories of a project together in a room of a palace. Every tool takes an optional `namespace`; without one it uses `--namespace`. Ids are the UUIDs the tools return.
 
@@ -423,7 +490,9 @@ Grafeno Studio shows an agent's palaces in its **Palaces** view, read through th
 
 ## Watch the agent's memory as it writes
 
-The MCP process opens its database file directly, and only one process can open a file: while the agent runs, Grafeno Studio or `grafeno shell --db` cannot open it too, and say it is already open. Let the agent's MCP server also serve the HTTP API on the same database, and connect to that instead:
+With the server (`--url`), connect Grafeno Studio or `grafeno shell --url` to the same server and namespace: what the agent stores appears there as it writes it.
+
+With a file of its own, the MCP process opens it directly, and only one process can open a file: while the agent runs, Grafeno Studio or `grafeno shell --db` cannot open it too, and say it is already open. Let the agent's MCP server also serve the HTTP API on the same database, and connect to that instead:
 
 ```bash
 grafeno mcp --db agent.redb --namespace me --listen 127.0.0.1:7810 --token "$GRAFENO_TOKEN"

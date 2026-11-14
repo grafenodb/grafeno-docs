@@ -5,24 +5,91 @@ description: Dale a un agente Grafeno como memoria de largo plazo mediante Model
 
 # MCP para agentes
 
-`grafeno mcp` habla MCP por la entrada y la salida estándar. El cliente del agente inicia el proceso e intercambia JSON-RPC con él; los registros van a la salida de error. No necesita un servidor: el proceso abre su archivo de base por sí mismo.
+Grafeno le da a un agente una memoria de largo plazo mediante MCP, el protocolo con el que los agentes llaman herramientas. El cliente del agente (el programa en el que corre el agente) inicia `grafeno mcp` y habla con él por la entrada y la salida estándar; los registros van a la salida de error. El agente recibe herramientas para recordar, buscar, retomar su trabajo y ordenar lo que sabe en palacios.
+
+## Configurarlo
+
+### 1. Elige dónde vive la memoria
+
+| | El servidor de Grafeno (recomendado) | Un archivo propio |
+| --- | --- | --- |
+| Cómo | `grafeno mcp --url` ejecuta sus herramientas en un servidor en marcha | `grafeno mcp --db` abre un archivo de base |
+| Sirve para | el uso diario: varios agentes a la vez, Grafeno Studio o la consola viendo cómo escribe el agente | probar, un solo agente |
+| Qué arrancar a mano | nada si el servidor corre como servicio; si no, `grafeno serve` antes que el agente | nada: lo inicia el cliente |
+| Límite | el servidor debe estar en marcha cuando el agente llama una herramienta | solo un proceso puede abrir un archivo: mientras el agente funciona, nada más puede abrirlo |
+
+Los instaladores y paquetes dejan el servidor como un servicio que arranca con el equipo ([Instalación](../get-started/install.md)), en `http://127.0.0.1:7810`. Comprueba que responde:
 
 ```bash
-grafeno mcp --db agente.redb --namespace yo
+curl http://127.0.0.1:7810/health
 ```
 
-La configuración de un cliente MCP (dónde está el archivo y cómo se llama dependen del cliente):
+### 2. Dale una clave al agente
+
+El agente firma sus peticiones con una clave propia, limitada a su namespace (aquí `me`, que se crea con la primera escritura). En el equipo del servidor, como administrador, porque solo los administradores pueden leer el archivo de configuración:
+
+```bash
+# Linux
+sudo grafeno keys create mi-agente --grant me:write --config /etc/grafeno/grafeno.toml
+# Windows, en una terminal abierta como administrador
+grafeno keys create mi-agente --grant me:write --config C:\ProgramData\Grafeno\grafeno.toml
+```
+
+El secreto de la clave se muestra una sola vez: cópialo. Grafeno Studio también crea claves, en **Administration**. Comprueba que la clave funciona; la respuesta lista las herramientas que puede usar:
+
+```bash
+curl -H "Authorization: Bearer <la clave>" http://127.0.0.1:7810/v1/me/tools
+```
+
+### 3. Añade Grafeno al cliente del agente
+
+Los clientes guardan sus servidores MCP en un archivo de configuración, y algunos tienen un comando que lo escribe; su documentación dice dónde. La mayoría acepta este JSON tal cual:
 
 ```json
 {
   "mcpServers": {
     "grafeno": {
       "command": "grafeno",
-      "args": ["mcp", "--db", "/ruta/a/agente.redb", "--namespace", "yo"]
+      "args": ["mcp", "--url", "http://127.0.0.1:7810", "--token", "<la clave>", "--namespace", "me"]
     }
   }
 }
 ```
+
+Con un archivo propio en vez del servidor, los argumentos son `["mcp", "--db", "/ruta/a/agente.redb", "--namespace", "me"]`.
+
+Si `grafeno` no está en el `PATH`, o se encuentra antes una copia vieja (`grafeno --version` dice cuál), escribe la ruta completa en `command`, como `C:\\Program Files\\Grafeno\\grafeno.exe`.
+
+Un cliente lee sus servidores MCP al empezar una sesión: abre una sesión nueva después de cambiarlos.
+
+### 4. Comprueba que el agente lo usa
+
+Pídele al agente que llame a `palace_map`. El cliente muestra cada llamada a una herramienta con el nombre del servidor (`grafeno`); un cliente sin las herramientas dice que no tiene ninguna con ese nombre. Si el servidor está apagado, o la clave es incorrecta, la herramienta lo dice (`did not answer`, `refused it (401)`), y la siguiente llamada funciona en cuanto se arregla, sin abrir otra sesión.
+
+### 5. Ordena la memoria
+
+| Nivel | Úsalo para | Ejemplo |
+| --- | --- | --- |
+| Namespace | una persona o un agente, o lo que deba quedar aparte (otro cliente, los permisos de otro equipo) | `me` |
+| Palacio | un proyecto | `Facturación` |
+| Sala | un área del proyecto | `API`, `Base de datos`, `Docs` |
+| Locus | un tema dentro del área | `Releases` |
+| Memoria | una decisión, un problema, algo aprendido, anclada en un locus | "Las facturas se reintentan tres veces" |
+| Checkpoint | dónde queda una tarea al terminar una sesión | "Pasar facturación a eventos" |
+
+Un namespace con un palacio por proyecto guarda en un solo sitio lo que vale para todos (preferencias, formas de trabajar), y permite que una memoria de un proyecto se relacione con otra de otro. Un namespace por sesión perdería el sentido: la sesión siguiente empezaría sin nada. Dile al agente qué palacio usa su proyecto en las instrucciones que su cliente lee para el proyecto, por ejemplo: "Grafeno es la memoria de este proyecto; su palacio es `Facturación`. Al empezar, llama a `palace_enter`; antes de terminar, guarda un `checkpoint`."
+
+### Cuando algo falla
+
+| Ves | Por qué | Qué hacer |
+| --- | --- | --- |
+| `Database already open. Cannot acquire lock.` | otro proceso tiene el archivo abierto: el `grafeno mcp --db` de otra sesión, o un servidor sobre él | usa el servidor (`--url`), o cierra el otro proceso |
+| El agente no tiene herramientas de Grafeno | la sesión empezó antes de añadir Grafeno, o el cliente no pudo iniciar el comando | abre una sesión nueva; revisa `command` con su ruta completa |
+| `did not answer` | el servidor no está en marcha | inicia el servicio o `grafeno serve` |
+| `refused it (401)` | una clave incorrecta o revocada | revisa la clave en `args` |
+| `refused it (403)` | la clave no tiene derechos sobre ese namespace | dáselos (`--grant me:write`) o usa su namespace |
+
+## Cómo lo usa el agente
 
 El servidor le explica al agente cómo usarlo al conectarse: llamar a `context` (o `recall`) antes de responder algo que pueda depender de lo que sabe, guardar hechos y decisiones nuevas con `remember`, conectar nodos con `relate`, usar `resume` al empezar trabajo en curso y `checkpoint` antes de terminar, y mantener juntos los recuerdos de un proyecto en una sala de un palacio. Cada herramienta acepta un `namespace` opcional; sin él usa `--namespace`. Los ids son los UUID que devuelven las herramientas.
 
@@ -423,7 +490,9 @@ Grafeno Studio muestra los palacios de un agente en su vista **Palaces**, leído
 
 ## Ver la memoria del agente mientras escribe
 
-El proceso MCP abre su archivo de base directamente, y solo un proceso puede abrir un archivo: mientras el agente funciona, Grafeno Studio o `grafeno shell --db` no pueden abrirlo a la vez, y dicen que ya está abierto. Haz que el servidor MCP del agente sirva también la API HTTP sobre la misma base, y conéctate a ella:
+Con el servidor (`--url`), conecta Grafeno Studio o `grafeno shell --url` al mismo servidor y namespace: lo que el agente guarda aparece allí mientras lo escribe.
+
+Con un archivo propio, el proceso MCP lo abre directamente, y solo un proceso puede abrir un archivo: mientras el agente funciona, Grafeno Studio o `grafeno shell --db` no pueden abrirlo a la vez, y dicen que ya está abierto. Haz que el servidor MCP del agente sirva también la API HTTP sobre la misma base, y conéctate a ella:
 
 ```bash
 grafeno mcp --db agente.redb --namespace yo --listen 127.0.0.1:7810 --token "$GRAFENO_TOKEN"
