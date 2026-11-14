@@ -419,7 +419,7 @@ grafeno mcp --url http://127.0.0.1:7810 --token "$AGENT_KEY" --namespace team
 
 The server checks each agent's rights by its key: an agent that may only read a namespace gets the tools that read there and is refused the others; one with no right on a namespace is refused there. A palace in a namespace only one account may use is that agent's own; a palace in a namespace several may read is shared. Each write is recorded as the agent's account, refusals go to the audit log, and the server takes the writes of every agent on its one writer, so they can work at the same time.
 
-The same tools run over HTTP: `GET /v1/{ns}/tools` lists those the caller may use, and `POST /v1/{ns}/tools/{name}` runs one with a JSON object of arguments and answers as MCP does. GQ runs on `POST /v1/{ns}/query`. The tools check rights by namespace: an account with rules on labels, properties or records uses the API's other routes. They are not available on a cluster yet.
+Grafeno Studio shows an agent's palaces in its **Palaces** view, read through these tools and writing nothing. The same tools run over HTTP: `GET /v1/{ns}/tools` lists those the caller may use, and `POST /v1/{ns}/tools/{name}` runs one with a JSON object of arguments and answers as MCP does. GQ runs on `POST /v1/{ns}/query`. The tools check rights by namespace: an account with rules on labels, properties or records uses the API's other routes. They are not available on a cluster yet.
 
 ## Watch the agent's memory as it writes
 

@@ -51,7 +51,8 @@ Puedes tener varias ventanas abiertas a la vez (**File → New window**, Ctrl+Sh
 | **Scripts** | escribe y ejecuta GQ; resultados como tabla, JSON, grafo o gráfico |
 | **Search** | búsqueda de texto, recall y el contexto que recibiría un agente |
 | **Memory** | duplicados, memorias débiles, consolidación en resúmenes |
-| **Administration** | revisa y reconstruye índices, exporta, importa, respalda |
+| **Palaces** | los palacios de un agente tal como él los lee: salas y loci, una sala al entrar con su checkpoint, lo que se sabe y lo que no, recorridos desde un tema, rutas por relaciones, propuestas para ordenarlo; no escribe nada |
+| **Administration** | revisa y reconstruye índices, exporta e importa (JSON Lines, GraphML, CSV), respalda |
 | **Cluster** | miembros, grupos Raft, retraso, dónde vive cada namespace (en un clúster) |
 | **Access** | usuarios, roles y sus privilegios |
 

@@ -419,7 +419,7 @@ grafeno mcp --url http://127.0.0.1:7810 --token "$CLAVE_DEL_AGENTE" --namespace 
 
 El servidor comprueba los derechos de cada agente por su clave: un agente que solo puede leer un namespace recibe las herramientas que leen allí y se le rechazan las demás; uno sin derechos sobre un namespace es rechazado allí. Un palacio en un namespace que solo una cuenta puede usar es de ese agente; un palacio en un namespace que varios pueden leer es compartido. Cada escritura queda registrada con la cuenta del agente, los rechazos van al registro de auditoría, y el servidor hace pasar las escrituras de todos los agentes por su único escritor, así que pueden trabajar a la vez.
 
-Las mismas herramientas funcionan por HTTP: `GET /v1/{ns}/tools` lista las que puede usar quien llama, y `POST /v1/{ns}/tools/{name}` ejecuta una con un objeto JSON de argumentos y responde como MCP. GQ va por `POST /v1/{ns}/query`. Las herramientas comprueban derechos por namespace: una cuenta con reglas sobre etiquetas, propiedades o registros usa las otras rutas de la API. Todavía no están disponibles en un clúster.
+Grafeno Studio muestra los palacios de un agente en su vista **Palaces**, leídos con estas herramientas y sin escribir nada. Las mismas herramientas funcionan por HTTP: `GET /v1/{ns}/tools` lista las que puede usar quien llama, y `POST /v1/{ns}/tools/{name}` ejecuta una con un objeto JSON de argumentos y responde como MCP. GQ va por `POST /v1/{ns}/query`. Las herramientas comprueban derechos por namespace: una cuenta con reglas sobre etiquetas, propiedades o registros usa las otras rutas de la API. Todavía no están disponibles en un clúster.
 
 ## Ver la memoria del agente mientras escribe
 

@@ -53,6 +53,29 @@ await vault.batch([
 ]);
 ```
 
+## Herramientas de memoria y palacios
+
+Las herramientas de memoria que los agentes usan por MCP también funcionan por HTTP (motores con la capacidad `tools`): `tools()` lista las que puede usar quien llama, y `tool()` ejecuta una y devuelve su respuesta como datos; un rechazo lanza un `GrafenoError` con el código `tool_error` y las palabras de la herramienta. `callTool()` devuelve la respuesta completa.
+
+```ts
+const map = await vault.tool<{palaces: {name: string}[]}>('palace_map');
+const walk = await vault.tool('palace_walk', {topic: 'billing outage', hops: 3});
+const reflection = await vault.tool('palace_reflect', {topic: 'invoices'});
+const history = await vault.tool('timeline', {id: decisionId});
+```
+
+Las herramientas y sus argumentos están en la [guía MCP](../guides/mcp.md). `contradictions()` lista los hechos que chocaron con restricciones, y `compact()` reconstruye un grafo vectorial desgastado por borrados.
+
+## Otras herramientas de grafos
+
+Un namespace sale como GraphML, o como CSV de sus nodos o de sus hechos, y vuelve a entrar:
+
+```ts
+const graphml = await grafeno.exportAs('vault-123', 'graphml');
+const stats = await grafeno.importAs('copy', 'graphml', graphml);
+// {nodes, edges, failed, errors}
+```
+
 ## Sesiones y clústeres
 
 Los usuarios pueden iniciar sesión con contraseña. `onSession` recibe los tokens renovados para que la aplicación los conserve.

@@ -53,6 +53,29 @@ await vault.batch([
 ]);
 ```
 
+## Memory tools and palaces
+
+The memory tools that agents use over MCP also run over HTTP (engines with the `tools` capability): `tools()` lists those the caller may use, and `tool()` runs one and returns its answer as data; a refusal throws a `GrafenoError` with the code `tool_error` and the tool's own words. `callTool()` returns the whole answer instead.
+
+```ts
+const map = await vault.tool<{palaces: {name: string}[]}>('palace_map');
+const walk = await vault.tool('palace_walk', {topic: 'billing outage', hops: 3});
+const reflection = await vault.tool('palace_reflect', {topic: 'invoices'});
+const history = await vault.tool('timeline', {id: decisionId});
+```
+
+The tools and their arguments are in the [MCP guide](../guides/mcp.md). `contradictions()` lists the facts that ran into constraints, and `compact()` rebuilds a vector graph worn by removals.
+
+## Other graph tools
+
+A namespace goes out as GraphML, or as CSV of its nodes or its facts, and comes back in:
+
+```ts
+const graphml = await grafeno.exportAs('vault-123', 'graphml');
+const stats = await grafeno.importAs('copy', 'graphml', graphml);
+// {nodes, edges, failed, errors}
+```
+
 ## Sessions and clusters
 
 Users can sign in with a password. `onSession` receives refreshed tokens so the application can persist them.

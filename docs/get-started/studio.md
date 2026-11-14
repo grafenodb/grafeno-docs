@@ -51,7 +51,8 @@ Several windows can be open at once (**File → New window**, Ctrl+Shift+N), eac
 | **Scripts** | write and run GQ, see results as a table, JSON, a graph or a chart |
 | **Search** | full-text search, recall and the context an agent would get |
 | **Memory** | duplicates, weak memories, consolidation into summaries |
-| **Administration** | check and rebuild indexes, export, import, back up |
+| **Palaces** | an agent's palaces as it reads them: rooms and loci, a room entered with its checkpoint, what is known and not known there, walks from a topic, routes along relations, proposals to arrange it; nothing is written |
+| **Administration** | check and rebuild indexes, export and import (JSON Lines, GraphML, CSV), back up |
 | **Cluster** | members, Raft groups, lag, where namespaces live (on a cluster) |
 | **Access** | users, roles and their privileges |
 
