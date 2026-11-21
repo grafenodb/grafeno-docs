@@ -14,7 +14,7 @@ Un solo programa, `grafeno`, es el servidor, la consola y todos los comandos de 
 | `grafeno setup` | Crea una instancia: carpeta de datos, configuración, primer administrador, servicio ([Instancias](./instances.md)). |
 | `grafeno instances` | Lista las instancias; quita una (`drop`) o vuelve atrás una tras actualizar (`rollback`). |
 | `grafeno doctor` | Revisa configuración, permisos, la base, el espacio en disco, el puerto y el servicio. |
-| `grafeno config token` | Muestra el token del servidor (`config path` muestra dónde está la configuración). |
+| `grafeno config token` | Muestra el token del servidor (`config path` muestra dónde está la configuración). `--rotate` hace que el servidor en marcha lo reemplace por uno nuevo, que muestra y escribe en el archivo de configuración. |
 | `grafeno serve --config F` | Corre el servidor en primer plano (es lo que hacen los servicios). |
 | `grafeno restore RESPALDO NUEVO` | Recupera un respaldo en un archivo de base nuevo ([Respaldos](./backups.md)). |
 

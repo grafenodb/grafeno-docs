@@ -103,6 +103,14 @@ sudo grafeno config token
 
 (On Windows, `grafeno config token` in an administrator PowerShell.) You will use it in the next steps. Keep it secret; for people and applications, create [accounts and roles](../guides/access.md) instead.
 
+To change it, with the server running:
+
+```bash
+sudo grafeno config token --rotate
+```
+
+It prints the new token, which works at once and is written to the settings file; the old one stops working. Clients that used the old one need the new one.
+
 ## Just trying it out?
 
 You do not need to install anything system-wide to experiment. With the `grafeno` program on hand (from the `.tar.gz` or `.zip` of a release), run a throwaway server in memory, which forgets everything when it stops:

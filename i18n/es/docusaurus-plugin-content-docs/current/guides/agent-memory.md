@@ -84,7 +84,7 @@ YIELD node, score, decision RETURN node.city, score, decision;
 (2 rows)
 ```
 
-**Duplicados probables.** `GET /v1/{ns}/duplicates` lista pares que pueden ser una sola entidad, de mejor a peor, con sus motivos. Una clave fuerte decide: el mismo email (sin importar mayúsculas) es la misma persona; uno distinto, homónimos:
+**Duplicados probables.** `GET /v1/{ns}/duplicates` lista pares que pueden ser una sola entidad, de mejor a peor, con sus motivos. Dos recuerdos del mismo tipo con el mismo texto (sin importar mayúsculas, acentos ni puntuación, de tres palabras al menos) son un par, con el motivo `same text`, tengan embeddings o no. Una clave fuerte decide: el mismo email (sin importar mayúsculas) es la misma persona; uno distinto, homónimos:
 
 ```bash
 curl "http://127.0.0.1:7810/v1/demo/duplicates?label=Person&strong_keys=email" -H "Authorization: Bearer $TOKEN"

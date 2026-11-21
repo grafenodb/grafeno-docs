@@ -103,6 +103,14 @@ sudo grafeno config token
 
 (En Windows, `grafeno config token` en un PowerShell de administrador.) Lo usarás en los próximos pasos. Guárdalo en secreto; para personas y aplicaciones, crea [cuentas y roles](../guides/access.md).
 
+Para cambiarlo, con el servidor en marcha:
+
+```bash
+sudo grafeno config token --rotate
+```
+
+Muestra el token nuevo, que funciona al momento y queda escrito en el archivo de configuración; el anterior deja de funcionar. Los clientes que usaban el anterior necesitan el nuevo.
+
 ## ¿Solo quieres probar?
 
 Para experimentar no hace falta instalar nada en el sistema. Con el programa `grafeno` a mano (del `.tar.gz` o `.zip` de un release), levanta un servidor desechable en memoria, que olvida todo al detenerse:

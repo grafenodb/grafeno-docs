@@ -14,7 +14,7 @@ One program, `grafeno`, is the server, the console and every administration comm
 | `grafeno setup` | Create an instance: data folder, settings, first administrator, service ([Instances](./instances.md)). |
 | `grafeno instances` | List instances; `drop` one, or `rollback` one after an upgrade. |
 | `grafeno doctor` | Check settings, permissions, the database, disk space, the port and the service. |
-| `grafeno config token` | Print the server's token (`config path` prints where the settings are). |
+| `grafeno config token` | Print the server's token (`config path` prints where the settings are). `--rotate` has the running server replace it with a new one, printed and written to the settings file. |
 | `grafeno serve --config F` | Run the server in the foreground (the services do this). |
 | `grafeno restore BACKUP NEW` | Recover a backup into a new database file ([Backups](./backups.md)). |
 

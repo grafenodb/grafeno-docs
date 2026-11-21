@@ -116,7 +116,7 @@ curl http://127.0.0.1:7810/v1/demo/vectors/health -H "Authorization: Bearer $TOK
 [{"index": null, "dimension": 128, "vectors": 20000, "removed": 38000, "repaired": 1711815, "churn": 1.9, "building": false}]
 ```
 
-The server compacts — builds again — a graph once `churn` (removals over vectors) reaches `compact_vectors_at` (0.5) in `[background]`, for graphs of 1 000 to 50 000 vectors. A compaction holds the writer about as long as inserting every vector again (about 6 s for 20 000 of 128 dimensions); searches use the old graph until it commits. Larger graphs are left to you, at a quiet time: `grafeno compact -n NS` (each vector index too) or `POST /v1/{ns}/compact?index=docs`. Measured on the graph above after five rounds of churn: recall@10 at `ef` 64 went from 0.995 to 1.000 and the vectors no search reached from 8 to 0.
+The server compacts — builds again — a graph once `churn` (removals over vectors) reaches `compact_vectors_at` (0.5) in `[background]`, for graphs of 1 000 to 50 000 vectors. A compaction holds the writer about as long as inserting every vector again (about 6 s for 20 000 of 128 dimensions); searches use the old graph until it commits. Larger graphs are left to you, at a quiet time: `grafeno compact -n NS` (each vector index too) or `POST /v1/{ns}/compact?index=docs`, which anyone who may write in the namespace can call: an agent with a write key keeps its own namespace in shape. Measured on the graph above after five rounds of churn: recall@10 at `ef` 64 went from 0.995 to 1.000 and the vectors no search reached from 8 to 0.
 
 ## Events with vectors
 

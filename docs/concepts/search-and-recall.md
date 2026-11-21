@@ -27,6 +27,18 @@ CALL db.search('telemetry', 5) YIELD node, score RETURN node.title, score;
 
 In the console: `\search telemetry`. Over HTTP: `POST /v1/{namespace}/search/text` with `{"query": "telemetry", "limit": 5}`.
 
+### The namespace's language
+
+Words match whole, without caring about accents or case. Tell a namespace which language its texts are in, and words are reduced to their stem, verbs too: "decidimos" finds "decidir", "revisiones" finds "revisión", "graphs" finds "graph".
+
+```bash
+curl -X PATCH http://127.0.0.1:7810/v1/namespaces/notas \
+  -H "Authorization: Bearer $TOKEN" -H 'content-type: application/json' \
+  -d '{"language": "es"}'
+```
+
+`es` (Spanish) and `en` (English); `null` goes back to whole words. It can also be given when the namespace is created (`POST /v1/namespaces` with `{"name": "notas", "language": "es"}`). Setting or changing it indexes the namespace's texts again at once. It applies to the node texts (`@text`), so to search and recall; a [full-text index](../gq/full-text.md) keeps the analyzer it was made with.
+
 ## Vector search
 
 Text search finds words; vector search finds *meaning*. Give a node an embedding — a list of numbers your embedding model produced — and Grafeno finds the nearest ones:
@@ -74,6 +86,12 @@ Each result says why it was found, in `signals`:
 
 Send `embedding` with the question's vector too, and recall uses meaning as well as words. In the console: `\recall who leads robotics?`.
 
+A memory only one of the two searches finds still ranks high when that search ranks it high: a question in Spanish about a memory written in English shares no words with it, and its meaning is enough. `labels` keeps the results to some kinds of node, and recall searches among those too, so asking for `["Decision"]` finds an old decision even under thousands of conversations about the same topic.
+
+### Replaced memories
+
+When a newer memory replaces an older one (a `supersedes` fact from the new to the old, still true), the old one ranks lower, whoever recorded either, and says so in its signals (`{"kind": "superseded", "by": [...]}`). `superseded_weight` is what its score is multiplied by: 0.2 by default, 1 to rank it as any other. Context ranks its memories the same way.
+
 ### Following the graph
 
 From the best few matches (`seeds`, 5), recall follows facts `depth` hops (1) and passes each node reached a share of the seed's score: half per hop (`decay`), and less through nodes with many edges. A node linked to almost everything (the user, the current project, a common tag) would otherwise collect score from every match and show up in every answer; recall divides the share along an edge by `sqrt((1 + hubs × ln d₁)(1 + hubs × ln d₂))`, where d₁ and d₂ are the edges of its two ends, and follows at most `fanout` neighbors (100) from each node, those the search found first. All of them go in `expand`:
@@ -84,7 +102,7 @@ curl -X POST http://127.0.0.1:7810/v1/demo/recall \
   -d '{"text": "what did the platform team decide?", "expand": {"depth": 3, "hubs": 1, "fanout": 100}}'
 ```
 
-`"expand": false` turns it off; `"hubs": 0` and `"fanout": 0` give the undamped expansion of earlier engines. The engine's repository has an example where the answer only comes back through the graph — a decision three hops from the person asked about, whose text names neither the person nor the team — with what text search alone finds and what undamped hubs do to it: `cargo run -p grafeno-memory --example multi_hop`.
+A node the graph reaches rises up to just below the memory that led to it, never past it: the memory the question matched comes first, and what it leads to right after. `"expand": false` turns it off; `"hubs": 0` and `"fanout": 0` give the undamped expansion of earlier engines. The engine's repository has an example where the answer only comes back through the graph — a decision three hops from the person asked about, whose text names neither the person nor the team — with what text search alone finds and what undamped hubs do to it: `cargo run -p grafeno-memory --example multi_hop`.
 
 ## Context
 

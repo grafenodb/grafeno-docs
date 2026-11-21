@@ -84,7 +84,7 @@ YIELD node, score, decision RETURN node.city, score, decision;
 (2 rows)
 ```
 
-**Likely duplicates.** `GET /v1/{ns}/duplicates` lists pairs that may be one entity, best first, with the reasons. A strong key decides: the same email (case aside) means the same person, a different one means namesakes:
+**Likely duplicates.** `GET /v1/{ns}/duplicates` lists pairs that may be one entity, best first, with the reasons. Two memories of a kind with the same text (case, accents and punctuation aside, three words at least) are a pair, with the reason `same text`, with embeddings or without. A strong key decides: the same email (case aside) means the same person, a different one means namesakes:
 
 ```bash
 curl "http://127.0.0.1:7810/v1/demo/duplicates?label=Person&strong_keys=email" -H "Authorization: Bearer $TOKEN"

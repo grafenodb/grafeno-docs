@@ -10,7 +10,7 @@ Grafeno tiene control de acceso basado en roles, como la mayoría de las bases d
 
 ## Quién puede qué, de entrada
 
-- El **token** del archivo de configuración es el dueño del servidor: puede hacerlo todo. Guárdalo para emergencias y para la configuración inicial.
+- El **token** del archivo de configuración es el administrador del servidor: no necesita cuenta ni contraseña, puede hacerlo todo y crea las cuentas, con sus roles y permisos, con las que entran las personas y los agentes. Guárdalo para emergencias y para la configuración inicial. Para cambiarlo, hay que dar el actual: `grafeno config token --rotate`, o `POST /v1/auth/token` con `{"current_token": "…"}` y el token como bearer; la respuesta es `{"token": "…"}`, el nuevo, que funciona al momento y queda escrito en el archivo de configuración. Solo el propio token puede cambiarlo, no una cuenta. Un token dado por `--token` o `GRAFENO_TOKEN` se cambia ahí, y se reinicia el servidor.
 - El **primer administrador** que creaste al instalar (un *superusuario*) también puede hacerlo todo, e inicia sesión con contraseña.
 - Un servidor sin token ni cuentas está **abierto** para cualquiera que llegue a él — bien en tu propia máquina, nunca en una red.
 

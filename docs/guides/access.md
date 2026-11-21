@@ -10,7 +10,7 @@ Grafeno has role-based access control, as most databases do: **accounts** sign i
 
 ## Who can do what, out of the box
 
-- The **token** in the settings file is the server's owner: it can do everything. Keep it for emergencies and setup.
+- The **token** in the settings file is the server's administrator: it needs no account or password, can do everything, and creates the accounts, with their roles and rights, that people and agents sign in with. Keep it for emergencies and setup. To change it, give the current one: `grafeno config token --rotate`, or `POST /v1/auth/token` with `{"current_token": "…"}` and the token as the bearer; the answer is `{"token": "…"}`, the new one, which works at once and is written to the settings file. Only the token itself can change it, not an account. A token given by `--token` or `GRAFENO_TOKEN` is changed there, and the server restarted.
 - The **first administrator** you created when installing (a *superuser*) can also do everything, and signs in with a password.
 - A server with neither a token nor accounts is **open** to anyone who reaches it — fine on your own machine, never on a network.
 

@@ -27,6 +27,18 @@ CALL db.search('telemetry', 5) YIELD node, score RETURN node.title, score;
 
 En la consola: `\search telemetry`. Por HTTP: `POST /v1/{namespace}/search/text` con `{"query": "telemetry", "limit": 5}`.
 
+### El idioma del namespace
+
+Las palabras coinciden enteras, sin importar acentos ni mayúsculas. Si le dices a un namespace en qué idioma están sus textos, las palabras se reducen a su raíz, también los verbos: «decidimos» encuentra «decidir», «revisiones» encuentra «revisión», «graphs» encuentra «graph».
+
+```bash
+curl -X PATCH http://127.0.0.1:7810/v1/namespaces/notas \
+  -H "Authorization: Bearer $TOKEN" -H 'content-type: application/json' \
+  -d '{"language": "es"}'
+```
+
+`es` (español) y `en` (inglés); `null` vuelve a las palabras enteras. También puede darse al crear el namespace (`POST /v1/namespaces` con `{"name": "notas", "language": "es"}`). Fijarlo o cambiarlo vuelve a indexar al momento los textos del namespace. Se aplica a los textos de los nodos (`@text`), es decir, a la búsqueda y al recall; un [índice de texto completo](../gq/full-text.md) conserva el analizador con el que se creó.
+
 ## Búsqueda vectorial
 
 La búsqueda de texto encuentra palabras; la vectorial encuentra *significado*. Dale a un nodo un embedding — una lista de números que produjo tu modelo de embeddings — y Grafeno encuentra los más cercanos:
@@ -74,6 +86,12 @@ Cada resultado dice por qué se encontró, en `signals`:
 
 Envía también `embedding` con el vector de la pregunta, y el recall usa significado además de palabras. En la consola: `\recall who leads robotics?`.
 
+Un recuerdo que solo una de las dos búsquedas encuentra sigue saliendo arriba si esa búsqueda lo pone arriba: una pregunta en español sobre un recuerdo escrito en inglés no comparte palabras con él, y su significado basta. `labels` deja los resultados en algunos tipos de nodo, y el recall también busca entre ellos, así que pedir `["Decision"]` encuentra una decisión antigua aunque haya miles de conversaciones sobre el mismo tema.
+
+### Recuerdos reemplazados
+
+Cuando un recuerdo más nuevo reemplaza a uno anterior (un hecho `supersedes` del nuevo al viejo, todavía vigente), el viejo baja de posición, sin importar quién grabó cada uno, y lo dice en sus señales (`{"kind": "superseded", "by": [...]}`). `superseded_weight` es el factor por el que se multiplica su puntuación: 0,2 por defecto, 1 para ordenarlo como cualquier otro. El contexto ordena sus recuerdos del mismo modo.
+
 ### Seguir el grafo
 
 Desde las mejores coincidencias (`seeds`, 5), el recall sigue los hechos `depth` saltos (1) y le pasa a cada nodo alcanzado una parte del puntaje de la semilla: la mitad por salto (`decay`), y menos a través de nodos con muchas aristas. Un nodo conectado con casi todo (el usuario, el proyecto actual, una etiqueta común) sumaría puntaje de cada coincidencia y aparecería en todas las respuestas; el recall divide la parte que pasa por una arista entre `sqrt((1 + hubs × ln d₁)(1 + hubs × ln d₂))`, donde d₁ y d₂ son las aristas de sus dos extremos, y sigue como máximo `fanout` vecinos (100) desde cada nodo, primero los que encontró la búsqueda. Todo va en `expand`:
@@ -84,7 +102,7 @@ curl -X POST http://127.0.0.1:7810/v1/demo/recall \
   -d '{"text": "what did the platform team decide?", "expand": {"depth": 3, "hubs": 1, "fanout": 100}}'
 ```
 
-`"expand": false` lo desactiva; `"hubs": 0` y `"fanout": 0` dan la expansión sin atenuar de los motores anteriores. El repositorio del motor tiene un ejemplo en el que la respuesta solo vuelve a través del grafo (una decisión a tres saltos de la persona por la que se pregunta, cuyo texto no nombra ni a la persona ni al equipo), con lo que encuentra la búsqueda de texto sola y lo que le hacen los hubs sin atenuar: `cargo run -p grafeno-memory --example multi_hop`.
+Un nodo al que llega el grafo sube hasta justo debajo del recuerdo que lo trajo, nunca por encima: el recuerdo con el que coincide la pregunta va primero, y aquello a lo que lleva, justo después. `"expand": false` lo desactiva; `"hubs": 0` y `"fanout": 0` dan la expansión sin atenuar de los motores anteriores. El repositorio del motor tiene un ejemplo en el que la respuesta solo vuelve a través del grafo (una decisión a tres saltos de la persona por la que se pregunta, cuyo texto no nombra ni a la persona ni al equipo), con lo que encuentra la búsqueda de texto sola y lo que le hacen los hubs sin atenuar: `cargo run -p grafeno-memory --example multi_hop`.
 
 ## Contexto {#context}
 
