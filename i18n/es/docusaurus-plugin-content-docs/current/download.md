@@ -12,8 +12,8 @@ Grafeno son dos productos, que se instalan por separado: **el motor** (la base d
 
 | Producto | Último release | Qué cambió |
 | --- | --- | --- |
-| Motor de Grafeno | 0.5.0 | [Notas del release](https://github.com/grafenodb/grafeno/releases/latest) |
-| Grafeno Studio | 0.3.0 | [Notas del release](https://github.com/grafenodb/grafeno-studio/releases/latest) |
+| Motor de Grafeno | 0.5.1 | [Notas del release](https://github.com/grafenodb/grafeno/releases/latest) |
+| Grafeno Studio | 0.4.0 | [Notas del release](https://github.com/grafenodb/grafeno-studio/releases/latest) |
 
 ## El motor de Grafeno
 
