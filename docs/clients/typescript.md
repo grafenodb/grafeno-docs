@@ -76,6 +76,25 @@ const stats = await grafeno.importAs('copy', 'graphml', graphml);
 // {nodes, edges, failed, errors}
 ```
 
+## Hyperedges
+
+With an engine of 0.5 or later (`supports('hyperedges')`), facts that relate several nodes, each in a role:
+
+```ts
+const {hyperedge_refs} = await vault.batch([
+  {op: 'create_hyperedge', ref: '$decision', hyperedge: {
+    label: 'decision',
+    participants: [{node: anaId, role: 'proposer'}, {node: taskId, role: 'subject'}],
+  }},
+]);
+const decision = await vault.getHyperedge(hyperedge_refs!.$decision);
+const withBoth = await vault.findHyperedges([anaId, taskId]);
+const ofAna = await vault.nodeHyperedges(anaId, {labels: ['decision']});
+await vault.deleteNode(taskId, {hyperedges: 'detach'});
+```
+
+`createHyperedge`, `patchHyperedge`, `invalidateHyperedge`, `retractHyperedge` and `deleteHyperedge` mirror the edge methods, and `exportAs` and `importAs` take `hyperedges.csv`. GQ and its clauses are in [Hyperedges](../gq/hyperedges.md).
+
 ## Sessions and clusters
 
 Users can sign in with a password. `onSession` receives refreshed tokens so the application can persist them.

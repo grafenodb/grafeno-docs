@@ -19,6 +19,8 @@ CREATE (d:Document {title: 'Entrevista', @text: 'Ana ingresó al hospital.'})
 CREATE (d)-[:mentions]->(p);
 ```
 
+Una **hiperarista** relaciona dos o más nodos a la vez, cada uno con un rol (quién propuso una decisión, quién la revisó, la tarea de la que trata), con propiedades y los mismos campos de tiempo; GQ la lee y la escribe con cláusulas propias (ver [Hiperaristas](../gq/hyperedges.md)).
+
 Los campos que comienzan con `@` son pseudopropiedades, no propiedades JSON del usuario. Algunos ejemplos son `@id`, `@text`, `@embedding`, `@valid_from`, `@valid_to`, `@recorded_at` y `@recorded_by`.
 
 ## Namespaces

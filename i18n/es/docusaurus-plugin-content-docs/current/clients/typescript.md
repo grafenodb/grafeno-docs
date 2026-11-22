@@ -76,6 +76,25 @@ const stats = await grafeno.importAs('copy', 'graphml', graphml);
 // {nodes, edges, failed, errors}
 ```
 
+## Hiperaristas
+
+Con un motor 0.5 o posterior (`supports('hyperedges')`), hechos que relacionan varios nodos, cada uno con un rol:
+
+```ts
+const {hyperedge_refs} = await vault.batch([
+  {op: 'create_hyperedge', ref: '$decision', hyperedge: {
+    label: 'decision',
+    participants: [{node: anaId, role: 'proposer'}, {node: taskId, role: 'subject'}],
+  }},
+]);
+const decision = await vault.getHyperedge(hyperedge_refs!.$decision);
+const withBoth = await vault.findHyperedges([anaId, taskId]);
+const ofAna = await vault.nodeHyperedges(anaId, {labels: ['decision']});
+await vault.deleteNode(taskId, {hyperedges: 'detach'});
+```
+
+`createHyperedge`, `patchHyperedge`, `invalidateHyperedge`, `retractHyperedge` y `deleteHyperedge` son como los métodos de aristas, y `exportAs` e `importAs` aceptan `hyperedges.csv`. GQ y sus cláusulas están en [Hiperaristas](../gq/hyperedges.md).
+
 ## Sesiones y clústeres
 
 Los usuarios pueden iniciar sesión con contraseña. `onSession` recibe los tokens renovados para que la aplicación los conserve.

@@ -60,6 +60,11 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: 'category',
+          label: 'Hyperedges',
+          items: ['gq/hyperedges'],
+        },
+        {
+          type: 'category',
           label: 'Search',
           items: ['gq/full-text', 'gq/similar-text'],
         },

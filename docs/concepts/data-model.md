@@ -19,6 +19,8 @@ CREATE (d:Document {title: 'Interview', @text: 'Ana joined the hospital.'})
 CREATE (d)-[:mentions]->(p);
 ```
 
+A **hyperedge** relates two or more nodes at once, each in a role (who proposed a decision, who reviewed it, the task it is about), with properties and the same time fields; GQ reads and writes it with clauses of its own (see [Hyperedges](../gq/hyperedges.md)).
+
 Fields beginning with `@` are pseudo-properties rather than user JSON properties. Common examples are `@id`, `@text`, `@embedding`, `@valid_from`, `@valid_to`, `@recorded_at`, and `@recorded_by`.
 
 ## Namespaces

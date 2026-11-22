@@ -47,6 +47,10 @@
     "message": "Valores y funciones",
     "description": "The label for category 'Values and functions' in sidebar 'docs'"
   },
+  "sidebar.docs.category.Hyperedges": {
+    "message": "Hiperaristas",
+    "description": "The label for category 'Hyperedges' in sidebar 'docs'"
+  },
   "sidebar.docs.category.Search": {
     "message": "Búsqueda",
     "description": "The label for category 'Search' in sidebar 'docs'"
