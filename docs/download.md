@@ -12,7 +12,7 @@ Grafeno comes as two products, installed apart: **the engine** (the database, wh
 
 | Product | Latest release | What changed |
 | --- | --- | --- |
-| Grafeno engine | 0.5.1 | [Release notes](https://github.com/grafenodb/grafeno/releases/latest) |
+| Grafeno engine | 0.5.0 | [Release notes](https://github.com/grafenodb/grafeno/releases/latest) |
 | Grafeno Studio | 0.4.0 | [Release notes](https://github.com/grafenodb/grafeno-studio/releases/latest) |
 
 ## The Grafeno engine
