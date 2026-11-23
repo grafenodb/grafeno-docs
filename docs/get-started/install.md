@@ -58,6 +58,37 @@ sudo dnf install ./grafeno-0.1.0-1.x86_64.rpm
 
 Both x86_64 and aarch64 (ARM) are supported. Without root, the same one-liner installs the program into `~/.local/bin` (add `--service` for a user service).
 
+## Docker
+
+The image `ghcr.io/grafenodb/grafeno` holds the same program as the release, runs as an unprivileged user, keeps everything in the volume `/data` and listens on port 7810. Start it with a named volume, so that the data outlives the container:
+
+```bash
+docker run -d --name grafeno -p 127.0.0.1:7810:7810 -v grafeno-data:/data ghcr.io/grafenodb/grafeno:latest
+```
+
+The first start creates the settings `/data/grafeno.toml`, with a random [token](#your-token), and the database `/data/grafeno.redb`. The token is never written to the logs; print it with:
+
+```bash
+docker exec grafeno grafeno config token --path /data/grafeno.toml
+```
+
+Inside the container the server listens on every interface, so it never runs without a token. `-p 127.0.0.1:7810:7810` publishes the port to this machine only; drop `127.0.0.1:` only when other machines must reach it.
+
+Other ways to start it:
+
+- `-e GRAFENO_TOKEN=<your token>`: that token instead of a settings file.
+- `-e GRAFENO_CONFIG=/etc/grafeno/grafeno.toml`, with your own settings file mounted at that path.
+
+Any other command runs `grafeno` inside the container:
+
+```bash
+docker exec -it grafeno grafeno shell --config /data/grafeno.toml
+docker exec grafeno grafeno backup --config /data/grafeno.toml /data/backup.redb
+docker cp grafeno:/data/backup.redb .
+```
+
+`docker stop grafeno` stops it cleanly. To move to a new version, remove the container and start the new image with the same volume: the data and the token stay. Pin a version (`ghcr.io/grafenodb/grafeno:0.5.1`) rather than `latest` where upgrades must be deliberate.
+
 ## Check the installation
 
 `grafeno doctor` checks the settings, the folders and their permissions, the database, the free disk space, the port and the service:

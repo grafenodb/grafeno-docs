@@ -1,6 +1,6 @@
 ---
 title: Download
-description: Every installer of the Grafeno engine and of Grafeno Studio, for Windows and Linux.
+description: Every installer of the Grafeno engine and of Grafeno Studio, for Windows and Linux, and the engine's container image.
 slug: /download
 displayed_sidebar: null
 hide_table_of_contents: false
@@ -50,6 +50,16 @@ sudo dnf install --nogpgcheck ./grafeno-linux-x86_64.rpm   # RHEL, Fedora (after
 ```
 
 How to install it, step by step: [Install Grafeno → Linux](./get-started/install.md#linux).
+
+### Docker
+
+The engine as a container image, for linux/amd64 and linux/arm64, published with every release on the GitHub Container Registry: **`ghcr.io/grafenodb/grafeno`** (tags `latest`, the version such as `0.5.1`, and `0.5`).
+
+```bash
+docker run -d --name grafeno -p 127.0.0.1:7810:7810 -v grafeno-data:/data ghcr.io/grafenodb/grafeno:latest
+```
+
+How to run it, step by step: [Install Grafeno → Docker](./get-started/install.md#docker).
 
 ## Grafeno Studio
 

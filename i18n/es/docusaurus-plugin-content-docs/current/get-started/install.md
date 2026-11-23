@@ -58,6 +58,37 @@ sudo dnf install ./grafeno-0.1.0-1.x86_64.rpm
 
 Funciona en x86_64 y en aarch64 (ARM). Sin root, el mismo comando instala el programa en `~/.local/bin` (agrega `--service` para un servicio de usuario).
 
+## Docker
+
+La imagen `ghcr.io/grafenodb/grafeno` contiene el mismo programa que la versión publicada, se ejecuta con un usuario sin privilegios, guarda todo en el volumen `/data` y escucha en el puerto 7810. Iníciala con un volumen con nombre, para que los datos sobrevivan al contenedor:
+
+```bash
+docker run -d --name grafeno -p 127.0.0.1:7810:7810 -v grafeno-data:/data ghcr.io/grafenodb/grafeno:latest
+```
+
+El primer inicio crea la configuración `/data/grafeno.toml`, con un [token](#your-token) aleatorio, y la base de datos `/data/grafeno.redb`. El token nunca se escribe en los registros; muéstralo con:
+
+```bash
+docker exec grafeno grafeno config token --path /data/grafeno.toml
+```
+
+Dentro del contenedor el servidor escucha en todas las interfaces, así que nunca funciona sin token. `-p 127.0.0.1:7810:7810` publica el puerto solo para esta máquina; quita `127.0.0.1:` solo si otras máquinas deben alcanzarlo.
+
+Otras formas de iniciarlo:
+
+- `-e GRAFENO_TOKEN=<tu token>`: ese token en lugar de un archivo de configuración.
+- `-e GRAFENO_CONFIG=/etc/grafeno/grafeno.toml`, con tu propio archivo de configuración montado en esa ruta.
+
+Cualquier otro comando ejecuta `grafeno` dentro del contenedor:
+
+```bash
+docker exec -it grafeno grafeno shell --config /data/grafeno.toml
+docker exec grafeno grafeno backup --config /data/grafeno.toml /data/backup.redb
+docker cp grafeno:/data/backup.redb .
+```
+
+`docker stop grafeno` lo detiene limpiamente. Para pasar a una versión nueva, elimina el contenedor e inicia la imagen nueva con el mismo volumen: los datos y el token se conservan. Fija una versión (`ghcr.io/grafenodb/grafeno:0.5.1`) en lugar de `latest` cuando las actualizaciones deban ser deliberadas.
+
 ## Comprobar la instalación
 
 `grafeno doctor` revisa la configuración, las carpetas y sus permisos, la base de datos, el espacio libre, el puerto y el servicio:

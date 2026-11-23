@@ -1,6 +1,6 @@
 ---
 title: Descargas
-description: Todos los instaladores del motor de Grafeno y de Grafeno Studio, para Windows y Linux.
+description: Todos los instaladores del motor de Grafeno y de Grafeno Studio, para Windows y Linux, y la imagen de contenedor del motor.
 slug: /download
 displayed_sidebar: null
 hide_table_of_contents: false
@@ -50,6 +50,16 @@ sudo dnf install --nogpgcheck ./grafeno-linux-x86_64.rpm   # RHEL, Fedora (tras 
 ```
 
 Cómo instalarlo, paso a paso: [Instalar Grafeno → Linux](./get-started/install.md#linux).
+
+### Docker
+
+El motor como imagen de contenedor, para linux/amd64 y linux/arm64, publicada con cada versión en el GitHub Container Registry: **`ghcr.io/grafenodb/grafeno`** (etiquetas `latest`, la versión, como `0.5.1`, y `0.5`).
+
+```bash
+docker run -d --name grafeno -p 127.0.0.1:7810:7810 -v grafeno-data:/data ghcr.io/grafenodb/grafeno:latest
+```
+
+Cómo ejecutarlo, paso a paso: [Instalar Grafeno → Docker](./get-started/install.md#docker).
 
 ## Grafeno Studio
 
