@@ -87,7 +87,7 @@ docker exec grafeno grafeno backup --config /data/grafeno.toml /data/backup.redb
 docker cp grafeno:/data/backup.redb .
 ```
 
-`docker stop grafeno` lo detiene limpiamente. Para pasar a una versión nueva, elimina el contenedor e inicia la imagen nueva con el mismo volumen: los datos y el token se conservan. Fija una versión (`ghcr.io/grafenodb/grafeno:0.5.2`) en lugar de `latest` cuando las actualizaciones deban ser deliberadas.
+`docker stop grafeno` lo detiene limpiamente. Para pasar a una versión nueva, elimina el contenedor e inicia la imagen nueva con el mismo volumen: los datos y el token se conservan. Fija una versión (`ghcr.io/grafenodb/grafeno:0.5.3`) en lugar de `latest` cuando las actualizaciones deban ser deliberadas.
 
 ## Comprobar la instalación
 

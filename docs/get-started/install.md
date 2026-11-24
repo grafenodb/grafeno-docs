@@ -87,7 +87,7 @@ docker exec grafeno grafeno backup --config /data/grafeno.toml /data/backup.redb
 docker cp grafeno:/data/backup.redb .
 ```
 
-`docker stop grafeno` stops it cleanly. To move to a new version, remove the container and start the new image with the same volume: the data and the token stay. Pin a version (`ghcr.io/grafenodb/grafeno:0.5.2`) rather than `latest` where upgrades must be deliberate.
+`docker stop grafeno` stops it cleanly. To move to a new version, remove the container and start the new image with the same volume: the data and the token stay. Pin a version (`ghcr.io/grafenodb/grafeno:0.5.3`) rather than `latest` where upgrades must be deliberate.
 
 ## Check the installation
 

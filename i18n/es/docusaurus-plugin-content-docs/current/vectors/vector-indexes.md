@@ -183,7 +183,7 @@ CREATE (:Product {name: 'Broken', embedding: [0.1, 0.2]});
 ```
 
 ```text result title="Resultado"
-error: invalid input: products holds vectors of dimension 4: node 01a1cb1f-5312-76ab-90ba-7512656cee99 has 2 values in embedding
+error: invalid input: products holds vectors of dimension 4: node 01a20de3-5bcc-7279-ab4a-67902474dc4c has 2 values in embedding
 ```
 
 ## Ajustar el índice
@@ -208,6 +208,37 @@ RETURN node.name, round(score, 3) AS score;
 ```
 
 [Dimensionamiento](sizing.md) muestra cuánto cuesta esto en memoria y tiempo.
+
+## Indexar los embeddings
+
+Un vector también puede ser el embedding del nodo (`SET n.@embedding = …`) en lugar de una propiedad. Un índice `ON (n.@embedding)` busca en los embeddings de los nodos con sus etiquetas: el vector se guarda una sola vez, no en el nodo y otra vez en el índice, lo que reduce mucho la base cuando los vectores son grandes. Solo admite `dimension` y `ef_search`, y no hay nada que construir:
+
+```text run title="Ejemplo"
+UNWIND range(0, 9) AS i
+CREATE (n:Article {i: i}) SET n.@embedding = [cos(radians(i * 10)), sin(radians(i * 10))];
+UNWIND range(0, 9) AS i
+CREATE (n:Comment {i: i}) SET n.@embedding = [cos(radians(i * 10 + 5)), sin(radians(i * 10 + 5))];
+CREATE VECTOR INDEX articles FOR (a:Article) ON (a.@embedding) OPTIONS {dimension: 2};
+CALL db.searchVector([1.0, 0.0], {index: 'articles', limit: 3}) YIELD node, score
+RETURN labels(node) AS labels, node.i AS i, round(score, 3) AS score;
+```
+
+```text result title="Resultado"
+10 nodes created, 10 properties set
+10 nodes created, 10 properties set
+ name     | label   | property   | unique | entries | fuzzy | on    | key   | kind   | state
+----------+---------+------------+--------+---------+-------+-------+-------+--------+--------
+ articles | Article | @embedding | false  | 10      | false | nodes | false | vector | online
+(1 row)
+ labels    | i | score
+-----------+---+-------
+ [Article] | 0 | 1.0
+ [Article] | 1 | 0.985
+ [Article] | 2 | 0.94
+(3 rows)
+```
+
+Los comentarios, tan cerca como los artículos, quedan fuera: el índice se limita a su etiqueta. Las búsquedas recorren el único grafo del namespace con las etiquetas como filtro, así que una etiqueta con una parte pequeña de los embeddings necesita más pasos que un índice propio.
 
 ## Construir en segundo plano
 
@@ -237,12 +268,13 @@ SHOW INDEXES;
 ```
 
 ```text result title="Resultado"
- name     | label   | property  | unique | entries | fuzzy | on    | key   | kind   | state
-----------+---------+-----------+--------+---------+-------+-------+-------+--------+----------
- places   | Spot    | xy        | false  | 3       | false | nodes | false | vector | online
- products | Product | embedding | false  | 6       | false | nodes | false | vector | online
- reviews  | Review  | embedding | false  | 0       | false | nodes | false | vector | building
-(3 rows)
+ name     | label   | property   | unique | entries | fuzzy | on    | key   | kind   | state
+----------+---------+------------+--------+---------+-------+-------+-------+--------+----------
+ articles | Article | @embedding | false  | 10      | false | nodes | false | vector | online
+ places   | Spot    | xy         | false  | 3       | false | nodes | false | vector | online
+ products | Product | embedding  | false  | 6       | false | nodes | false | vector | online
+ reviews  | Review  | embedding  | false  | 0       | false | nodes | false | vector | building
+(4 rows)
 ```
 
 ```text run title="Ejemplo"

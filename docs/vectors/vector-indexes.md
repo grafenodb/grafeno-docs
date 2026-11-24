@@ -183,7 +183,7 @@ CREATE (:Product {name: 'Broken', embedding: [0.1, 0.2]});
 ```
 
 ```text result title="Result"
-error: invalid input: products holds vectors of dimension 4: node 01a1cb1f-4457-74e4-8fcb-fc28eda4ee81 has 2 values in embedding
+error: invalid input: products holds vectors of dimension 4: node 01a20de3-5b8f-766f-86aa-77a83bb455cc has 2 values in embedding
 ```
 
 ## Tune the index
@@ -208,6 +208,37 @@ RETURN node.name, round(score, 3) AS score;
 ```
 
 [Sizing](sizing.md) shows what these cost in memory and time.
+
+## Index the embeddings
+
+A vector can also be the node's embedding (`SET n.@embedding = …`) instead of a property. An index `ON (n.@embedding)` searches the embeddings of the nodes with its labels: the vector is stored once, not in the node and again in the index, which makes the database much smaller when vectors are large. It takes `dimension` and `ef_search` only, and has nothing to build:
+
+```text run title="Example"
+UNWIND range(0, 9) AS i
+CREATE (n:Article {i: i}) SET n.@embedding = [cos(radians(i * 10)), sin(radians(i * 10))];
+UNWIND range(0, 9) AS i
+CREATE (n:Comment {i: i}) SET n.@embedding = [cos(radians(i * 10 + 5)), sin(radians(i * 10 + 5))];
+CREATE VECTOR INDEX articles FOR (a:Article) ON (a.@embedding) OPTIONS {dimension: 2};
+CALL db.searchVector([1.0, 0.0], {index: 'articles', limit: 3}) YIELD node, score
+RETURN labels(node) AS labels, node.i AS i, round(score, 3) AS score;
+```
+
+```text result title="Result"
+10 nodes created, 10 properties set
+10 nodes created, 10 properties set
+ name     | label   | property   | unique | entries | fuzzy | on    | key   | kind   | state
+----------+---------+------------+--------+---------+-------+-------+-------+--------+--------
+ articles | Article | @embedding | false  | 10      | false | nodes | false | vector | online
+(1 row)
+ labels    | i | score
+-----------+---+-------
+ [Article] | 0 | 1.0
+ [Article] | 1 | 0.985
+ [Article] | 2 | 0.94
+(3 rows)
+```
+
+The comments, as close as the articles, stay out: the index keeps to its label. Searches walk the namespace's one graph with the labels as a filter, so a label with a small share of the embeddings takes more steps than an index of its own.
 
 ## Build in the background
 
@@ -237,12 +268,13 @@ SHOW INDEXES;
 ```
 
 ```text result title="Result"
- name     | label   | property  | unique | entries | fuzzy | on    | key   | kind   | state
-----------+---------+-----------+--------+---------+-------+-------+-------+--------+----------
- places   | Spot    | xy        | false  | 3       | false | nodes | false | vector | online
- products | Product | embedding | false  | 6       | false | nodes | false | vector | online
- reviews  | Review  | embedding | false  | 0       | false | nodes | false | vector | building
-(3 rows)
+ name     | label   | property   | unique | entries | fuzzy | on    | key   | kind   | state
+----------+---------+------------+--------+---------+-------+-------+-------+--------+----------
+ articles | Article | @embedding | false  | 10      | false | nodes | false | vector | online
+ places   | Spot    | xy         | false  | 3       | false | nodes | false | vector | online
+ products | Product | embedding  | false  | 6       | false | nodes | false | vector | online
+ reviews  | Review  | embedding  | false  | 0       | false | nodes | false | vector | building
+(4 rows)
 ```
 
 ```text run title="Example"
