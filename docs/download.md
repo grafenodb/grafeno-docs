@@ -12,7 +12,7 @@ Grafeno comes as two products, installed apart: **the engine** (the database, wh
 
 | Product | Latest release | What changed |
 | --- | --- | --- |
-| Grafeno engine | 0.5.1 | [Release notes](https://github.com/grafenodb/grafeno/releases/latest) |
+| Grafeno engine | 0.5.2 | [Release notes](https://github.com/grafenodb/grafeno/releases/latest) |
 | Grafeno Studio | 0.4.0 | [Release notes](https://github.com/grafenodb/grafeno-studio/releases/latest) |
 
 ## The Grafeno engine
@@ -53,7 +53,7 @@ How to install it, step by step: [Install Grafeno → Linux](./get-started/insta
 
 ### Docker
 
-The engine as a container image, for linux/amd64 and linux/arm64, published with every release on the GitHub Container Registry: **`ghcr.io/grafenodb/grafeno`** (tags `latest`, the version such as `0.5.1`, and `0.5`).
+The engine as a container image, for linux/amd64 and linux/arm64, published with every release on the GitHub Container Registry: **`ghcr.io/grafenodb/grafeno`** (tags `latest`, the version such as `0.5.2`, and `0.5`).
 
 ```bash
 docker run -d --name grafeno -p 127.0.0.1:7810:7810 -v grafeno-data:/data ghcr.io/grafenodb/grafeno:latest
