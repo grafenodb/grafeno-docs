@@ -89,6 +89,23 @@ DROP NAMESPACE 'team-a' IF EXISTS;
 (0 rows)
 ```
 
+## Indexing policy
+
+A namespace's policy says which of its node properties get indexes without a `CREATE INDEX`. It is given when the namespace is created, or changed later:
+
+```text
+CREATE NAMESPACE shop OPTIONS {indexing: {mode: 'automatic'}};
+ALTER NAMESPACE docs SET INDEXING {mode: 'hybrid', exclude: ['raw'],
+  labels: {Doc: {properties: {title: ['fulltext'], year: ['range']}}}};
+ALTER NAMESPACE crm SET INDEXING {mode: 'manual'};
+```
+
+- **automatic**: when a write gives a label a property it has not had, its first value decides. A string of up to 256 characters, a number or a boolean gets a property index (equality, ranges, prefixes); a longer string gets a full-text index; lists, maps and nulls get none. At most 32 automatic indexes per label.
+- **manual**: none; indexes come from [`CREATE INDEX`](./indexes.md).
+- **hybrid**: automatic, with rules first, in this order: a rule for the label and property, an exclusion (`exclude`), a rule for the property in any label (`properties`), then the automatic decision. A rule is a list of `exact`, `range`, `fulltext` or `none`.
+
+A server's new namespaces are automatic unless told otherwise (`[indexing] mode` in its settings). Automatic indexes are ordinary indexes named `auto_Label_property`: `SHOW INDEXES` shows them with `origin` `auto` and how many reads used each (`uses`); drop one and it is not made again. Changing a policy builds nothing for the data already stored: `grafeno storage apply --indexing automatic` does ([Storage and migrations](../operations/storage.md)).
+
 ## Work in a namespace
 
 In the console, `\use name` switches namespace, and `grafeno shell -n name` starts in one. Over HTTP the namespace is part of the address: `POST /v1/crm/query`.

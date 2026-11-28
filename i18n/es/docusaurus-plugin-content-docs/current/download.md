@@ -12,7 +12,7 @@ Grafeno son dos productos, que se instalan por separado: **el motor** (la base d
 
 | Producto | Último release | Qué cambió |
 | --- | --- | --- |
-| Motor de Grafeno | 0.5.3 | [Notas del release](https://github.com/grafenodb/grafeno/releases/latest) |
+| Motor de Grafeno | 0.6.0 | [Notas del release](https://github.com/grafenodb/grafeno/releases/latest) |
 | Grafeno Studio | 0.4.0 | [Notas del release](https://github.com/grafenodb/grafeno-studio/releases/latest) |
 
 ## El motor de Grafeno
@@ -53,7 +53,7 @@ Cómo instalarlo, paso a paso: [Instalar Grafeno → Linux](./get-started/instal
 
 ### Docker
 
-El motor como imagen de contenedor, para linux/amd64 y linux/arm64, publicada con cada versión en el GitHub Container Registry: **`ghcr.io/grafenodb/grafeno`** (etiquetas `latest`, la versión, como `0.5.3`, y `0.5`).
+El motor como imagen de contenedor, para linux/amd64 y linux/arm64, publicada con cada versión en el GitHub Container Registry: **`ghcr.io/grafenodb/grafeno`** (etiquetas `latest`, la versión, como `0.6.0`, y `0.6`).
 
 ```bash
 docker run -d --name grafeno -p 127.0.0.1:7810:7810 -v grafeno-data:/data ghcr.io/grafenodb/grafeno:latest

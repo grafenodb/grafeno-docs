@@ -120,7 +120,7 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Operations',
-      items: ['operations/cli', 'operations/instances', 'operations/backups', 'operations/cluster'],
+      items: ['operations/cli', 'operations/instances', 'operations/backups', 'operations/cluster', 'operations/storage'],
     },
     {type: 'category', label: 'Reference', items: ['reference/gq', 'reference/configuration']},
   ],

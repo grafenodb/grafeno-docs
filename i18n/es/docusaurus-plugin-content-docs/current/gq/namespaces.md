@@ -89,6 +89,23 @@ DROP NAMESPACE 'team-a' IF EXISTS;
 (0 rows)
 ```
 
+## Política de indexación
+
+La política de un namespace dice qué propiedades de sus nodos tienen índices sin un `CREATE INDEX`. Se da al crear el namespace, o se cambia después:
+
+```text
+CREATE NAMESPACE shop OPTIONS {indexing: {mode: 'automatic'}};
+ALTER NAMESPACE docs SET INDEXING {mode: 'hybrid', exclude: ['raw'],
+  labels: {Doc: {properties: {title: ['fulltext'], year: ['range']}}}};
+ALTER NAMESPACE crm SET INDEXING {mode: 'manual'};
+```
+
+- **automatic**: cuando una escritura da a una etiqueta una propiedad que no tenía, decide su primer valor. Un texto de hasta 256 caracteres, un número o un booleano tienen un índice de propiedad (igualdad, rangos, prefijos); un texto más largo, un índice de texto completo; listas, mapas y nulos, ninguno. Como mucho 32 índices automáticos por etiqueta.
+- **manual**: ninguno; los índices vienen de [`CREATE INDEX`](./indexes.md).
+- **hybrid**: automático, con reglas antes, en este orden: una regla para la etiqueta y la propiedad, una exclusión (`exclude`), una regla para la propiedad en cualquier etiqueta (`properties`) y luego la decisión automática. Una regla es una lista de `exact`, `range`, `fulltext` o `none`.
+
+Los namespaces nuevos de un servidor son automáticos salvo que se diga otra cosa (`[indexing] mode` en sus ajustes). Los índices automáticos son índices normales llamados `auto_Etiqueta_propiedad`: `SHOW INDEXES` los muestra con `origin` `auto` y cuántas lecturas usaron cada uno (`uses`); si borras uno, no se vuelve a crear. Cambiar una política no crea nada para los datos ya guardados: lo hace `grafeno storage apply --indexing automatic` ([Almacenamiento y migraciones](../operations/storage.md)).
+
 ## Trabajar en un namespace
 
 En la consola, `\use nombre` cambia de namespace, y `grafeno shell -n nombre` empieza en uno. Por HTTP el namespace es parte de la dirección: `POST /v1/crm/query`.

@@ -43,6 +43,9 @@ The commands below inspect and repair the data. Commands that use `--db` open th
 | `grafeno extract --db F -n NS` | Link mentions in new and changed text. |
 | `grafeno export --db F -o data.jsonl` | Export JSON Lines. |
 | `grafeno import --db F data.jsonl` | Import an export transactionally. |
+| `grafeno vacuum --db F [--maximum]` | Give the space deletes freed back to the system ([Storage](./storage.md#give-space-back)). |
+| `grafeno storage stats \| status --db F` | What each table takes, and the work pending. |
+| `grafeno storage plan \| apply \| resume \| verify --db F` | Bring a file up to the current storage formats, or back ([Storage and migrations](./storage.md)). |
 
 Use `--all` instead of `-n NS` where supported. CSV and GraphML are available with `--format csv` or `--format graphml`; those formats target one namespace.
 
